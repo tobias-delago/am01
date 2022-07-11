@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 /work_in_progress
+.gitignore
+am01.Rproj
