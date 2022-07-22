@@ -141,7 +141,9 @@ Given these trends, what can you say about life expectancy since 1952? Again, do
 We will have a look at the results of the 2016 Brexit vote in the UK. First we read the data using `read_csv()` and have a quick glimpse at the data
 
 ```{r load_brexit_data, warning=FALSE, message=FALSE}
-brexit_results <- read_csv(here::here("data","brexit_results.csv"))
+
+# read data directly off github repo
+brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoulou/am01/master/data/brexit_results.csv")
 
 
 glimpse(brexit_results)
