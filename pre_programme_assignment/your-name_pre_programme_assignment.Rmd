@@ -1,7 +1,7 @@
 ---
 title: 'MAM 2023 Pre-programme Assignment'
-author: "YOUR NAME HERE"
-date: "DATE HERE"
+author: "Tobias Delago"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
     theme: flatly
@@ -223,6 +223,7 @@ animal_rescue <- read_csv(url,
 
 glimpse(animal_rescue)
 ```
+
 One of the more useful things one can do with any data set is quick counts, namely to see how many observations fall within one category. For instance, if we wanted to count the number of incidents by year, we would either use `group_by()... summarise()` or, simply [`count()`](https://dplyr.tidyverse.org/reference/count.html)
 
 ```{r, instances_by_calendar_year}
@@ -264,7 +265,7 @@ animal_rescue %>%
 
 ```
 
-Do you see anything strange in these tables? 
+Do you see anything strange in these tables?
 
 Finally, let us have a loot at the notional cost for rescuing each of these animals. As the LFB says,
 
@@ -272,9 +273,8 @@ Finally, let us have a loot at the notional cost for rescuing each of these anim
 
 There is two things we will do:
 
-1. Calculate the mean and median `incident_notional_cost` for each `animal_group_parent`
-2. Plot a boxplot to get a feel for the distribution of `incident_notional_cost` by `animal_group_parent`.
-
+1.  Calculate the mean and median `incident_notional_cost` for each `animal_group_parent`
+2.  Plot a boxplot to get a feel for the distribution of `incident_notional_cost` by `animal_group_parent`.
 
 Before we go on, however, we need to fix `incident_notional_cost` as it is stored as a `chr`, or character, rather than a number.
 
@@ -294,8 +294,7 @@ typeof(animal_rescue$incident_notional_cost)
 
 ```
 
-Now that incident_notional_cost is numeric, let us quickly calculate summary statistics for each animal group. 
-
+Now that incident_notional_cost is numeric, let us quickly calculate summary statistics for each animal group.
 
 ```{r, stats_on_incident_cost,message=FALSE, warning=FALSE}
 
@@ -321,10 +320,7 @@ animal_rescue %>%
 
 ```
 
-
-
-Compare the mean and the median for each animal group. waht do you think this is telling us?
-Anything else that stands out? Any outliers?
+Compare the mean and the median for each animal group. waht do you think this is telling us? Anything else that stands out? Any outliers?
 
 Finally, let us plot a few plots that show the distribution of incident_cost for each animal group.
 
@@ -349,7 +345,6 @@ base_plot + stat_ecdf(geom = "step", pad = FALSE) +
 ```
 
 Which of these four graphs do you think best communicates the variability of the `incident_notional_cost` values? Also, can you please tell some sort of story (which animals are more expensive to rescue than others, the spread of values) and speculate about the differences in the patterns.
-
 
 # Submit the assignment
 
