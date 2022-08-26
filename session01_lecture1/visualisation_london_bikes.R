@@ -2,7 +2,8 @@ library(tidyverse)
 library(mosaic)
 library(here)
 library(lubridate)
-
+library(skimr)
+library(ggiraph) # interactive graphs
 
 #read the CSV file
 bike <- read_csv(here::here("data", "london_bikes.csv"))
@@ -37,9 +38,9 @@ skim(bike)
 
 
 # Time series plot of bikes rented
-ggplot(bike, aes(x=day, y=bikes_hired))+
+ggplot(bike, aes(x=date, y=bikes_hired))+
   geom_smooth()+
-  geom_point(alpha = 0.4)+
+  geom_point(alpha = 0.3)+
   theme_bw()+
   NULL
 
@@ -149,19 +150,18 @@ ggplot(bike, aes(x=month_name, y= bikes_hired))+
 # bikes_hired vs. weather features
 ggplot(bike, aes(x=mean_temp, y= bikes_hired))+
   geom_point()+
-  geom_smooth(method = "lm")+
+  geom_smooth(method = "lm", se=FALSE)+
   theme_bw()+
   NULL
 
 ggplot(bike, aes(x=mean_temp, y= bikes_hired, colour=season_name))+
-  geom_point(alpha = 0.3)+
-  geom_smooth(method = "lm")+
+  geom_point(alpha = 0.2)+
+  geom_smooth(method = "lm", se=FALSE)+
   theme_bw()+
-  facet_wrap(~season_name, ncol=1)+
+#  facet_wrap(~season_name, ncol=1)+
   NULL
 
-# interactive graph
-library(ggiraph)
+
 
 temperature_by_season <- ggplot(bike, aes(x=mean_temp, y= bikes_hired,colour=season_name)) +
   
