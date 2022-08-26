@@ -9,8 +9,8 @@ survey <- read_csv(here::here('data', 'early_careers_survey.csv'))
 
 
 
-# Histogram on stress about analytics (stress_analytics) and day-to-day stress (stress_day)
-ggplot(survey, aes (x=stress_analytics))+
+# Histogram on stress about analytics (anxiety_about_analytics) and day-to-day stress (relaxed_stressful)
+ggplot(survey, aes (x=anxiety_about_analytics))+
   geom_histogram(fill="#001e62", alpha = 0.88, boundary=1)+
   theme_minimal()+
   geom_vline(xintercept = 1.5, colour="orange", size = 3, linetype = "dashed")+
@@ -22,7 +22,7 @@ ggplot(survey, aes (x=stress_analytics))+
   )
 
 
-ggplot(survey, aes (x=stress_day))+
+ggplot(survey, aes (x=relaxed_stressful))+
   geom_histogram(fill="tomato", alpha = 0.88, boundary=1)+
   theme_minimal()+
   labs(
@@ -36,28 +36,32 @@ ggplot(survey, aes (x=stress_day))+
 # summary stats on measures of stress
 
 survey %>% 
-  select(stress_analytics, stress_day ) %>% 
+  select(anxiety_about_analytics, relaxed_stressful ) %>% 
   skim()
 
 
-# Is there a difference in stress_analytics between men and women?
-
-mosaic::favstats(stress_analytics ~ gender, data = survey)
-
-ggplot(survey, aes (x=stress_analytics, y = gender))+
+# Is there a difference in anxiety_about_analytics between men and women?
+ggplot(survey, aes (x=anxiety_about_analytics, y = gender))+
   geom_boxplot()+
+  geom_jitter()+
   theme_minimal()+
   NULL
+
+
+mosaic::favstats(anxiety_about_analytics ~ gender, data = survey)
+
 
 
 # Is there a difference in day-to-day stress between men and women?
 
-mosaic::favstats(stress_day ~ gender, data = survey)
-
-ggplot(survey, aes (x=stress_day, y = gender))+
+ggplot(survey, aes (x=relaxed_stressful, y = gender))+
   geom_boxplot()+
+  geom_jitter()+
   theme_minimal()+
   NULL
+
+
+mosaic::favstats(relaxed_stressful ~ gender, data = survey)
 
 
 # Histogram on handedness
@@ -69,28 +73,28 @@ ggplot(survey, aes (x=handedness))+
     title = "Handedness",
     subtitle = "-1: Exclusively left handed, +1: Exclusively right handed",
     x="",
-    caption = "LBS Early Careers Analytics Survey"
+    caption = "LBS Data Analytics Survey"
   )
 
 
 # --------------------- HAIRCUT SPEND ------------------------
 # summary statistics of haircut 
-favstats(~last_haircut, data=survey)
+favstats(~haircut_spend, data=survey)
 
-# summary statistics oflast_haircut_spend vs. student
-mosaic::favstats(last_haircut ~ gender, data = survey)
+# summary statistics ofhaircut_spend_spend vs. student
+mosaic::favstats(haircut_spend ~ gender, data = survey)
 
-ggplot(survey, aes (x=last_haircut, y = gender))+
+ggplot(survey, aes (x=haircut_spend, y = gender))+
   geom_boxplot()+
   theme_minimal()+
   NULL
 
-ggplot(survey, aes (x=last_haircut, fill = gender))+
+ggplot(survey, aes (x=haircut_spend, fill = gender))+
   geom_density(alpha = 0.3)+
   theme_minimal()+
   NULL
 
-t.test(last_haircut ~ gender, data = survey)
+t.test(haircut_spend ~ gender, data = survey)
 
 # --------------------- EXERcISE HOURS ------------------------
 # summary statistics 
@@ -132,22 +136,22 @@ t.test(online_hrs ~ gender, data = survey)
 
 # --------------------- SLEEP HOURS ------------------------
 # summary statistics 
-favstats(~sleep_hours, data=survey)
+favstats(~sleep_hrs, data=survey)
 
 # summary statistics by gender
-mosaic::favstats(sleep_hours ~ gender, data = survey)
+mosaic::favstats(sleep_hrs ~ gender, data = survey)
 
-ggplot(survey, aes (x=sleep_hours, y = gender))+
+ggplot(survey, aes (x=sleep_hrs, y = gender))+
   geom_boxplot()+
   theme_minimal()+
   NULL
 
-ggplot(survey, aes (x=sleep_hours, fill = gender))+
+ggplot(survey, aes (x=sleep_hrs, fill = gender))+
   geom_density(alpha = 0.3)+
   theme_minimal()+
   NULL
 
-t.test(sleep_hours ~ gender, data = survey)
+t.test(sleep_hrs ~ gender, data = survey)
 
 
 # --------------------- FACEBOOK FRIENDS  ------------------------
@@ -170,94 +174,77 @@ ggplot(survey, aes (x=facebook_friends, fill = gender))+
 t.test(facebook_friends ~ gender, data = survey)
 
 
-# --------------------- MOTIVATION  ------------------------
+# --------------------- motivated_course_grade  ------------------------
 # summary statistics 
-favstats(~motivation, data=survey)
+favstats(~motivated_course_grade, data=survey)
 
 # summary statistics by gender
-mosaic::favstats(motivation ~ gender, data = survey)
+mosaic::favstats(motivated_course_grade ~ gender, data = survey)
 
-ggplot(survey, aes (x=motivation, y = gender))+
+ggplot(survey, aes (x=motivated_course_grade, y = gender))+
   geom_boxplot()+
   theme_minimal()+
   NULL
 
-ggplot(survey, aes (x=motivation, fill = gender))+
+ggplot(survey, aes (x=motivated_course_grade, fill = gender))+
   geom_density(alpha = 0.3)+
   theme_minimal()+
   NULL
 
-t.test(motivation ~ gender, data = survey)
+t.test(motivated_course_grade ~ gender, data = survey)
 
 # --------------------- STRESS DURING THE DAY  ------------------------
 # summary statistics 
-favstats(~stress_day, data=survey)
+favstats(~relaxed_stressful, data=survey)
 
 # summary statistics by gender
-mosaic::favstats(stress_day ~ gender, data = survey)
+mosaic::favstats(relaxed_stressful ~ gender, data = survey)
 
-ggplot(survey, aes (x=stress_day, y = gender))+
+ggplot(survey, aes (x=relaxed_stressful, y = gender))+
   geom_boxplot()+
   theme_minimal()+
   NULL
 
-ggplot(survey, aes (x=stress_day, fill = gender))+
+ggplot(survey, aes (x=relaxed_stressful, fill = gender))+
   geom_density(alpha = 0.3)+
   theme_minimal()+
   NULL
 
-t.test(stress_day ~ gender, data = survey)
+t.test(relaxed_stressful ~ gender, data = survey)
 
 # --------------------- STRESS ANALYTICS  ------------------------
 # summary statistics 
-favstats(~stress_analytics, data=survey)
+favstats(~anxiety_about_analytics, data=survey)
 
 # summary statistics by gender
-mosaic::favstats(stress_analytics ~ gender, data = survey)
+mosaic::favstats(anxiety_about_analytics ~ gender, data = survey)
 
-ggplot(survey, aes (x=stress_analytics, y = gender))+
+ggplot(survey, aes (x=anxiety_about_analytics, y = gender))+
   geom_boxplot()+
+  geom_jitter()+
   theme_minimal()+
   NULL
 
-ggplot(survey, aes (x=stress_analytics, fill = gender))+
+ggplot(survey, aes (x=anxiety_about_analytics, fill = gender))+
   geom_density(alpha = 0.3)+
   theme_minimal()+
   NULL
 
-t.test(stress_analytics ~ gender, data = survey)
+t.test(anxiety_about_analytics ~ gender, data = survey)
 
 
 # --------------------- HOMEOPATHY  ------------------------
 # summary statistics 
-favstats(~homeopathy_works, data=survey)
+survey |> 
+  count(homeopathy_works, sort=TRUE) |> 
+  mutate(prop = n/sum(n))
+
 
 # summary statistics by gender
-mosaic::favstats(homeopathy_works ~ gender, data = survey)
+survey |> 
+  dplyr::group_by(gender, homeopathy_works) |> 
+  summarise (count=n()) |> 
+  mutate(prop = count/sum(count))
 
-t.test(homeopathy_works ~ gender, data = survey)
-
-
-# --------------------- LIED ABOUT AGE  ------------------------
-# summary statistics 
-favstats(~lied_about_age, data=survey)
-
-# summary statistics by gender
-mosaic::favstats(lied_about_age ~ gender, data = survey)
-
-t.test(lied_about_age ~ gender, data = survey)
-
-
-# --------------------- MARIJUANA  ------------------------
-# summary statistics 
-favstats(~marijuana, data=survey)
-
-# summary statistics by gender
-mosaic::favstats(marijuana ~ gender, data = survey)
-
-t.test(marijuana ~ gender, data = survey)
-
-
-
-
-
+#using janitor::tabyl()
+janitor::tabyl(survey, gender, homeopathy_works,show_na=FALSE)

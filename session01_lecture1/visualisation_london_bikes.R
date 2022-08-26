@@ -10,7 +10,6 @@ bike <- read_csv(here::here("data", "london_bikes.csv"))
 # fix dates using lubridate, and generate new variables for year, month, month_name, day, and day_of _week
 bike <- bike %>%   
   mutate(
-    year=year(date),
     month = month(date),
     month_name=month(date, label = TRUE)) 
 
@@ -104,6 +103,9 @@ ggplot(bike, aes(x=bikes_hired))+
   geom_density(aes(fill=season_name), alpha = 0.3)+
   facet_wrap(~season_name, nrow = 4)+
   theme_bw()+
+  
+  #remove legend to the right
+  theme(legend.position = "none")+
   NULL
 
 # Density plot filled by season_name, and faceted by month_name
@@ -158,22 +160,24 @@ ggplot(bike, aes(x=mean_temp, y= bikes_hired, colour=season_name))+
   facet_wrap(~season_name, ncol=1)+
   NULL
 
-# interactive map
+# interactive graph
 library(ggiraph)
 
-temperature_by_season <- ggplot(bike) +
-  geom_point_interactive(aes(x=mean_temp, y= bikes_hired, colour=season_name, 
+temperature_by_season <- ggplot(bike, aes(x=mean_temp, y= bikes_hired,colour=season_name)) +
+  
+  # rather than using geom_point(), we use geom_point_interactive()
+  geom_point_interactive(aes( 
                              tooltip = glue::glue("Mean Temp: {mean_temp}\nBikes Hired: {bikes_hired}\nDate: {date}")),
                          alpha = 0.3) +
-#  geom_smooth(method = "lm")+
+  geom_smooth_interactive(se = FALSE, method = lm)+
   theme_bw()+
-#  facet_wrap(~season_name, ncol=1)+
-  facet_grid(season_name ~ weekend)+
+  facet_wrap(~season_name, ncol=1)+
+#  facet_grid(season_name ~ weekend)+
 
     theme(legend.position = "none")+
   NULL
 
-
+# you have created the ggplot object, you now pass it to
 girafe(
   ggobj = temperature_by_season
 )
@@ -200,10 +204,3 @@ ggplot(bike, aes(x=pressure, y= bikes_hired))+
 
 # weather features
 # https://www.ecad.eu/dailydata/datadictionarycountry.php?43il4bgek4lvi88fdri9d8sn97
-
-
-ggplot(bike, aes(x=wdsp, y= bikes_hired))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  theme_bw()+
-  NULL
