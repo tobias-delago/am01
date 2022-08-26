@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 /work_in_progress
+/website
 .gitignore
 am01.Rproj
