@@ -8,6 +8,9 @@ output:
     highlight: zenburn
     toc: yes
     toc_float: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
@@ -17,57 +20,56 @@ library(here)
 library(janitor)
 ```
 
-The goal is to test your software installation, to demonstrate competency in Markdown, and in the basics of `ggplot`.
+The goal is to test your software installation, to demonstrate
+competency in Markdown, and in the basics of `ggplot`.
 
-# R and RStudio installation
+## Biography
 
-You should successfully install R and R studio in your computer. We will do all of our work in this class with the open source (and free!) programming language [R](https://cran.r-project.org/). However, we will use [RStudio](https://www.rstudio.com/) as the main program to access R.
+**Tobias Delago** was born on 22nd May, 1997 in Bressanone, Italy. After
+attending the *Peter Anich Highschool* in Bolzano, where he ranked first
+in the 2016 class, he moved to Australia for a one-year work&travel
+experience.\
+In 2021 he graduated with a BEng in Industrial Engineering from the
+*University of Munich* and a BSc in Logistics Management from *Tongji
+University Shanghai*, ranking first with a 4.0 GPA.\
+\
+He speaks five languages:
 
-You can find details on how to [install both R and R studio here](https://mam2023.netlify.app/reference/01-reference/)
+-   Italian
 
-## Install `tidyverse`, `gapminder` and `here` packages
+-   German
 
-A clean installation of R is known as **base R**. We need to install a couple of packages, namely `tidyverse`, `gapminder`, and `here`. Go to the packages panel in the bottom right of RStudio, click on "Install," type `tidyverse`, and press enter. You'll see a bunch of output in the RStudio console as all the packages are installed and, depending on the speed of your computer, this may take a while. Once installation of tidyverse finishes, install `gapminder` and `here`.
+-   Ladin
 
-You can also just paste and run these commands
+-   English
 
--   `install.packages("tidyverse")`
--   `install.packages("gapminder")`
--   `install.packages("here")`
+-   French
 
-in the `console` (bottom left in RStudio) instead of using the packages panel.
+### Professional Experience
 
-You can find details on [installing the tidyverse here](https://mam2023.netlify.app/reference/02-reference)
+During high school, Tobias gained experience from several internships in
+hospitality and construction. Later in his career, he secured
+internships at *Porsche AG* and *Amazon.com, Inc.*, and worked as a
+teaching assistant in electrical engineering. Tobias served in the
+*Italian Air Force* for one year - where he also certified as
+Parachutists - before joining the *LBS* Master Program.\
+\
+[Tobias Delago
+CV](https://www.dropbox.com/s/5fz4rbnbh5vclej/Tobias%20Delago%20CV%20DRAFT.pdf?dl=0)
 
-## Practice using Markdown
+### Interests
 
-Written assignments will be submitted using [Markdown](https://daringfireball.net/projects/markdown/). Markdown is a lightweight text formatting language that easily converts between file formats. It is integrated directly into [R Markdown](http://rmarkdown.rstudio.com/), which combines R code, output, and written text into a single document (`.Rmd`).
+> I love spending time with my friends and family, playing the drums and doing all kinds of (extreme) sports!
 
-There is a very nice [Markdwown tutorial](https://commonmark.org/help/tutorial/) that I suggest you go through before working on your assignment. If you want to use a stand-alone Markdown editor [Typora](https://typora.io/) is a lightweight Markdown editor that inherently supports pandoc-flavored Markdown.
-
-## Pandoc
-
-[Pandoc](http://pandoc.org)is a program that converts Markdown files into basically anything else. It was created by [John MacFarlane](https://johnmacfarlane.net), a philosophy professor at the University of California, Berkeley and is widely used as a writing tool and as a basis for publishing workflow. Kieran Healy's [Plain Text Social Science workflow](http://plain-text.co) describes how to use Markdown and then convert your Markdown document to HTML, PDF, word, etc.
-
-You should create a file whose name will be `your_name.Rmd`, so if I were submitting, my file would be called `Kostis_Christodoulou.Rmd`
-
-# Task 1: Short biography written using markdown
-
-You should write within this Rmd file a brief biography of yourself using markdown syntax. I know you have already achieved a lot, but a couple of paragraphs is more than enough.
-
-To achieve full marks, you should include at least 4 of the following elements:
-
--   Headers
--   Emphasis (italics or bold)
--   Lists
--   Links
--   Embedding images
-
-> Please delete all the intro text I wrote from line 22 to line 69 and start writing your short biography after this blockquote.
+![Ironman](https://www.dropbox.com/s/6h5u85o3nhvwy6a/Ironman.jpg?raw=1)
 
 # Task 2: `gapminder` country comparison
 
-You have seen the `gapminder` dataset that has data on life expectancy, population, and GDP per capita for 142 countries from 1952 to 2007. To get a glimpse of the dataframe, namely to see the variable names, variable types, etc., we use the `glimpse` function. We also want to have a look at the first 20 rows of data.
+You have seen the `gapminder` dataset that has data on life expectancy,
+population, and GDP per capita for 142 countries from 1952 to 2007. To
+get a glimpse of the dataframe, namely to see the variable names,
+variable types, etc., we use the `glimpse` function. We also want to
+have a look at the first 20 rows of data.
 
 ```{r}
 glimpse(gapminder)
@@ -76,9 +78,11 @@ head(gapminder, 20) # look at the first 20 rows of the dataframe
 
 ```
 
-Your task is to produce two graphs of how life expectancy has changed over the years for the `country` and the `continent` you come from.
+Your task is to produce two graphs of how life expectancy has changed
+over the years for the `country` and the `continent` you come from.
 
-I have created the `country_data` and `continent_data` with the code below.
+I have created the `country_data` and `continent_data` with the code
+below.
 
 ```{r}
 country_data <- gapminder %>% 
@@ -88,7 +92,11 @@ continent_data <- gapminder %>%
             filter(continent == "Europe")
 ```
 
-First, create a plot of life expectancy over time for the single country you chose. Map `year` on the x-axis, and `lifeExp` on the y-axis. You should also use `geom_point()` to see the actual data points and `geom_smooth(se = FALSE)` to plot the underlying trendlines. You need to remove the comments **\#** from the lines below for your code to run.
+First, create a plot of life expectancy over time for the single country
+you chose. Map `year` on the x-axis, and `lifeExp` on the y-axis. You
+should also use `geom_point()` to see the actual data points and
+`geom_smooth(se = FALSE)` to plot the underlying trendlines. You need to
+remove the comments **\#** from the lines below for your code to run.
 
 ```{r, lifeExp_one_country}
 # plot1 <- ggplot(data = ??, mapping = aes(x = ??, y = ??))+
@@ -99,7 +107,8 @@ First, create a plot of life expectancy over time for the single country you cho
 # plot1
 ```
 
-Next we need to add a title. Create a new plot, or extend plot1, using the `labs()` function to add an informative title to the plot.
+Next we need to add a title. Create a new plot, or extend plot1, using
+the `labs()` function to add an informative title to the plot.
 
 ```{r, lifeExp_one_country_with_label}
 # plot1<- plot1 +
@@ -112,7 +121,10 @@ Next we need to add a title. Create a new plot, or extend plot1, using the `labs
 # plot1
 ```
 
-Secondly, produce a plot for all countries in the *continent* you come from. (Hint: map the `country` variable to the colour aesthetic. You also want to map `country` to the `group` aesthetic, so all points for each country are grouped together).
+Secondly, produce a plot for all countries in the *continent* you come
+from. (Hint: map the `country` variable to the colour aesthetic. You
+also want to map `country` to the `group` aesthetic, so all points for
+each country are grouped together).
 
 ```{r lifeExp_one_continent}
 # ggplot(gapminder, mapping = aes(x =  , y =  , colour= , group =))+
@@ -121,7 +133,10 @@ Secondly, produce a plot for all countries in the *continent* you come from. (Hi
 #   NULL
 ```
 
-Finally, using the original `gapminder` data, produce a life expectancy over time graph, grouped (or faceted) by continent. We will remove all legends, adding the `theme(legend.position="none")` in the end of our ggplot.
+Finally, using the original `gapminder` data, produce a life expectancy
+over time graph, grouped (or faceted) by continent. We will remove all
+legends, adding the `theme(legend.position="none")` in the end of our
+ggplot.
 
 ```{r lifeExp_facet_by_continent}
 # ggplot(data = gapminder , mapping = aes(x =  , y =  , colour= ))+
@@ -132,13 +147,17 @@ Finally, using the original `gapminder` data, produce a life expectancy over tim
 #   NULL
 ```
 
-Given these trends, what can you say about life expectancy since 1952? Again, don't just say what's happening in the graph. Tell some sort of story and speculate about the differences in the patterns.
+Given these trends, what can you say about life expectancy since 1952?
+Again, don't just say what's happening in the graph. Tell some sort of
+story and speculate about the differences in the patterns.
 
 > Type your answer after this blockquote.
 
 # Task 3: Brexit vote analysis
 
-We will have a look at the results of the 2016 Brexit vote in the UK. First we read the data using `read_csv()` and have a quick glimpse at the data
+We will have a look at the results of the 2016 Brexit vote in the UK.
+First we read the data using `read_csv()` and have a quick glimpse at
+the data
 
 ```{r load_brexit_data, warning=FALSE, message=FALSE}
 
@@ -149,11 +168,19 @@ brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoul
 glimpse(brexit_results)
 ```
 
-The data comes from [Elliott Morris](https://www.thecrosstab.com/), who cleaned it and made it available through his [DataCamp class on analysing election and polling data in R](https://www.datacamp.com/courses/analyzing-election-and-polling-data-in-r).
+The data comes from [Elliott Morris](https://www.thecrosstab.com/), who
+cleaned it and made it available through his [DataCamp class on
+analysing election and polling data in
+R](https://www.datacamp.com/courses/analyzing-election-and-polling-data-in-r).
 
-Our main outcome variable (or y) is `leave_share`, which is the percent of votes cast in favour of Brexit, or leaving the EU. Each row is a UK [parliament constituency](https://en.wikipedia.org/wiki/United_Kingdom_Parliament_constituencies).
+Our main outcome variable (or y) is `leave_share`, which is the percent
+of votes cast in favour of Brexit, or leaving the EU. Each row is a UK
+[parliament
+constituency](https://en.wikipedia.org/wiki/United_Kingdom_Parliament_constituencies).
 
-To get a sense of the spread, or distribution, of the data, we can plot a histogram, a density plot, and the empirical cumulative distribution function of the leave % in all constituencies.
+To get a sense of the spread, or distribution, of the data, we can plot
+a histogram, a density plot, and the empirical cumulative distribution
+function of the leave % in all constituencies.
 
 ```{r brexit_histogram, warning=FALSE, message=FALSE}
 
@@ -175,7 +202,11 @@ ggplot(brexit_results, aes(x = leave_share)) +
 
 ```
 
-One common explanation for the Brexit outcome was fear of immigration and opposition to the EU's more open border policy. We can check the relationship (or correlation) between the proportion of native born residents (`born_in_uk`) in a constituency and its `leave_share`. To do this, let us get the correlation between the two variables
+One common explanation for the Brexit outcome was fear of immigration
+and opposition to the EU's more open border policy. We can check the
+relationship (or correlation) between the proportion of native born
+residents (`born_in_uk`) in a constituency and its `leave_share`. To do
+this, let us get the correlation between the two variables
 
 ```{r brexit_immigration_correlation}
 brexit_results %>% 
@@ -183,9 +214,12 @@ brexit_results %>%
   cor()
 ```
 
-The correlation is almost 0.5, which shows that the two variables are positively correlated.
+The correlation is almost 0.5, which shows that the two variables are
+positively correlated.
 
-We can also create a scatterplot between these two variables using `geom_point`. We also add the best fit line, using `geom_smooth(method = "lm")`.
+We can also create a scatterplot between these two variables using
+`geom_point`. We also add the best fit line, using
+`geom_smooth(method = "lm")`.
 
 ```{r brexit_immigration_plot}
 ggplot(brexit_results, aes(x = born_in_uk, y = leave_share)) +
@@ -199,17 +233,32 @@ ggplot(brexit_results, aes(x = born_in_uk, y = leave_share)) +
   NULL
 ```
 
-You have the code for the plots, I would like you to revisit all of them and use the `labs()` function to add an informative title, subtitle, and axes titles to all plots.
+You have the code for the plots, I would like you to revisit all of them
+and use the `labs()` function to add an informative title, subtitle, and
+axes titles to all plots.
 
-What can you say about the relationship shown above? Again, don't just say what's happening in the graph. Tell some sort of story and speculate about the differences in the patterns.
+What can you say about the relationship shown above? Again, don't just
+say what's happening in the graph. Tell some sort of story and speculate
+about the differences in the patterns.
 
 > Type your answer after, and outside, this blockquote.
 
 # Task 4: Animal rescue incidents attended by the London Fire Brigade
 
-[The London Fire Brigade](https://data.london.gov.uk/dataset/animal-rescue-incidents-attended-by-lfb) attends a range of non-fire incidents (which we call 'special services'). These 'special services' include assistance to animals that may be trapped or in distress. The data is provided from January 2009 and is updated monthly. A range of information is supplied for each incident including some location information (postcode, borough, ward), as well as the data/time of the incidents. We do not routinely record data about animal deaths or injuries.
+[The London Fire
+Brigade](https://data.london.gov.uk/dataset/animal-rescue-incidents-attended-by-lfb)
+attends a range of non-fire incidents (which we call 'special
+services'). These 'special services' include assistance to animals that
+may be trapped or in distress. The data is provided from January 2009
+and is updated monthly. A range of information is supplied for each
+incident including some location information (postcode, borough, ward),
+as well as the data/time of the incidents. We do not routinely record
+data about animal deaths or injuries.
 
-Please note that any cost included is a notional cost calculated based on the length of time rounded up to the nearest hour spent by Pump, Aerial and FRU appliances at the incident and charged at the current Brigade hourly rate.
+Please note that any cost included is a notional cost calculated based
+on the length of time rounded up to the nearest hour spent by Pump,
+Aerial and FRU appliances at the incident and charged at the current
+Brigade hourly rate.
 
 ```{r load_animal_rescue_data, warning=FALSE, message=FALSE}
 
@@ -224,7 +273,11 @@ animal_rescue <- read_csv(url,
 glimpse(animal_rescue)
 ```
 
-One of the more useful things one can do with any data set is quick counts, namely to see how many observations fall within one category. For instance, if we wanted to count the number of incidents by year, we would either use `group_by()... summarise()` or, simply [`count()`](https://dplyr.tidyverse.org/reference/count.html)
+One of the more useful things one can do with any data set is quick
+counts, namely to see how many observations fall within one category.
+For instance, if we wanted to count the number of incidents by year, we
+would either use `group_by()... summarise()` or, simply
+[`count()`](https://dplyr.tidyverse.org/reference/count.html)
 
 ```{r, instances_by_calendar_year}
 
@@ -237,7 +290,8 @@ animal_rescue %>%
 
 ```
 
-Let us try to see how many incidents we have by animal group. Again, we can do this either using group_by() and summarise(), or by using count()
+Let us try to see how many incidents we have by animal group. Again, we
+can do this either using group_by() and summarise(), or by using count()
 
 ```{r, animal_group_percentages}
 animal_rescue %>% 
@@ -267,16 +321,23 @@ animal_rescue %>%
 
 Do you see anything strange in these tables?
 
-Finally, let us have a loot at the notional cost for rescuing each of these animals. As the LFB says,
+Finally, let us have a loot at the notional cost for rescuing each of
+these animals. As the LFB says,
 
-> Please note that any cost included is a notional cost calculated based on the length of time rounded up to the nearest hour spent by Pump, Aerial and FRU appliances at the incident and charged at the current Brigade hourly rate.
+> Please note that any cost included is a notional cost calculated based
+> on the length of time rounded up to the nearest hour spent by Pump,
+> Aerial and FRU appliances at the incident and charged at the current
+> Brigade hourly rate.
 
 There is two things we will do:
 
-1.  Calculate the mean and median `incident_notional_cost` for each `animal_group_parent`
-2.  Plot a boxplot to get a feel for the distribution of `incident_notional_cost` by `animal_group_parent`.
+1.  Calculate the mean and median `incident_notional_cost` for each
+    `animal_group_parent`
+2.  Plot a boxplot to get a feel for the distribution of
+    `incident_notional_cost` by `animal_group_parent`.
 
-Before we go on, however, we need to fix `incident_notional_cost` as it is stored as a `chr`, or character, rather than a number.
+Before we go on, however, we need to fix `incident_notional_cost` as it
+is stored as a `chr`, or character, rather than a number.
 
 ```{r, parse_incident_cost,message=FALSE, warning=FALSE}
 
@@ -294,7 +355,8 @@ typeof(animal_rescue$incident_notional_cost)
 
 ```
 
-Now that incident_notional_cost is numeric, let us quickly calculate summary statistics for each animal group.
+Now that incident_notional_cost is numeric, let us quickly calculate
+summary statistics for each animal group.
 
 ```{r, stats_on_incident_cost,message=FALSE, warning=FALSE}
 
@@ -320,9 +382,11 @@ animal_rescue %>%
 
 ```
 
-Compare the mean and the median for each animal group. waht do you think this is telling us? Anything else that stands out? Any outliers?
+Compare the mean and the median for each animal group. waht do you think
+this is telling us? Anything else that stands out? Any outliers?
 
-Finally, let us plot a few plots that show the distribution of incident_cost for each animal group.
+Finally, let us plot a few plots that show the distribution of
+incident_cost for each animal group.
 
 ```{r, plots_on_incident_cost_by_animal_group,message=FALSE, warning=FALSE}
 
@@ -344,16 +408,22 @@ base_plot + stat_ecdf(geom = "step", pad = FALSE) +
 
 ```
 
-Which of these four graphs do you think best communicates the variability of the `incident_notional_cost` values? Also, can you please tell some sort of story (which animals are more expensive to rescue than others, the spread of values) and speculate about the differences in the patterns.
+Which of these four graphs do you think best communicates the
+variability of the `incident_notional_cost` values? Also, can you please
+tell some sort of story (which animals are more expensive to rescue than
+others, the spread of values) and speculate about the differences in the
+patterns.
 
 # Submit the assignment
 
-Knit the completed R Markdown file as an HTML document (use the "Knit" button at the top of the script editor window) and upload it to Canvas.
+Knit the completed R Markdown file as an HTML document (use the "Knit"
+button at the top of the script editor window) and upload it to Canvas.
 
 ## Details
 
 If you want to, please answer the following
 
 -   Who did you collaborate with: TYPE NAMES HERE
--   Approximately how much time did you spend on this problem set: ANSWER HERE
+-   Approximately how much time did you spend on this problem set:
+    ANSWER HERE
 -   What, if anything, gave you the most trouble: ANSWER HERE
