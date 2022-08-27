@@ -32,17 +32,17 @@
       command = "hugo"
 
     [build.environment]
-      HUGO_VERSION = "0.88.1"
+      HUGO_VERSION = "0.101.0"
       HUGO_ENABLEGITINFO = "true"
 
     [context.production.environment]
       HUGO_ENV = "production"
       
     [context.branch-deploy.environment]
-      HUGO_VERSION = "0.88.1"
+      HUGO_VERSION = "0.101.0"
 
     [context.deploy-preview.environment]
-      HUGO_VERSION = "0.88.1"  
+      HUGO_VERSION = "0.101.0"  
 
 7.  Do a basic customisation, by editing the `config.yaml` file
 
@@ -94,7 +94,7 @@
 14. If you want to add another picture `pic1.jpg` anywhere in the Rmd, make sure you save the picture in `\static\img` and insert a chunk of code as follows:
 
 ```
-knitr::include_graphics("/img/pic1.jpg",error =FALSE)
+knitr::include_graphics("/img/pic1.jpg",error=FALSE)
 ```
 
 15. If you want to add a datafile that you use in one of your Rmds, say brexit_results.csv, create a folder `\data\` in the root folder of your website (where you also have the *.Rproj file). Save the brexit_results.csv file in that folder and to read it, use 
