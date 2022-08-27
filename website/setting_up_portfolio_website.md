@@ -23,7 +23,7 @@
           empty_dirs = TRUE,            
           to_yaml = TRUE)
 
-6.  Go to the Files section in the bottom right of RStudio, open `netlify.toml`, **delete its contents** and paste the following. The `"0.88.1"` refers to the hugo version you are using-- find out which one you have by typiong `blogdown::hugo_version()` in the console
+6.  Go to the Files section in the bottom right of RStudio, open `netlify.toml`, **delete its contents** and paste the following. The `"0.101.0"` refers to the hugo version you are using-- find out which one you have by typing `blogdown::hugo_version()` in the console
 
 <!-- -->
 
