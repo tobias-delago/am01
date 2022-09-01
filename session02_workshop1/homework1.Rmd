@@ -83,7 +83,7 @@ What are the variable types? Do they all correspond to what they really are? Whi
 # YOUR CODE GOES HERE
 skimr::skim(rent)
 glimpse(rent)
-View(rent)
+View(rent) # Testing only
 
 ```
 Variable types: chr & dbl\
