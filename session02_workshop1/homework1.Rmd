@@ -45,7 +45,7 @@ library(tidyquant)
 
 [What impact does new housing have on rents, displacement, and gentrification in the surrounding neighborhood? Read our interview with economist Kate Pennington about her article, "Does Building New Housing Cause Displacement?:The Supply and Demand Effects of Construction in San Francisco."](https://matrix.berkeley.edu/research-article/kate-pennington-on-gentrification-and-displacement-in-san-francisco/)
 
-In our case, we have a clean(ish) dataset with about 200K rows tht corresponf to Craigslist listings for renting properties in the greater SF area. The data dictionary is as follows
+In our case, we have a clean(ish) dataset with about 200K rows that correspond to Craigslist listings for renting properties in the greater SF area. The data dictionary is as follows
 
 | variable    | class     | description           |
 |-------------|-----------|-----------------------|
@@ -105,7 +105,7 @@ Make a plot that shows the evolution of median prices in San Francisco for 0, 1,
 
 ```
 
-Finally, make a plot that shows median rental prices for the top 2 cities in the Bay area. Your final graph should look like this
+Finally, make a plot that shows median rental prices for the top 12 cities in the Bay area. Your final graph should look like this
 
 ![](images/one_bed_bay_area.png)
 
