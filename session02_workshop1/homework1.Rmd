@@ -599,6 +599,51 @@ You have to create a graph that calculates the cumulative % change for 0-, 1-1, 
 
 ![](images/challenge1.png)
 
+```{r spirit_plot}
+# YOUR CODE GOES HERE
+cities_to_include <- c("berkeley","mountain view","oakland","palo alto", "san francisco", "san jose",
+                       "san mateo","santa clara","santa cruz", "santa rosa", "sunnyvale","union city")
+
+total_per_year <- rent %>% 
+  filter(beds <= 2, city %in% cities_to_include) %>% 
+  count(city, beds, name = "count_all_years") 
+
+total_per_year
+
+filtered_rent <- rent %>% 
+  filter(beds <= 2, city %in% cities_to_include) %>% 
+  group_by(year, city, beds) %>% 
+  summarise(n=n())
+
+filtered_rent
+
+combined <- merge(filtered_rent,total_per_year, by=c("city","beds"), all.x=TRUE, all.y=FALSE)
+
+combined <- combined %>% 
+  mutate(proportion = n/count_all_years)
+
+combined
+  
+
+ggplot(combined, aes(x=year, y = proportion, color = factor(city))) +
+  geom_line() +
+  facet_grid(beds~city, scales = "free") +
+  labs(
+    title = "Cumulative % change in 0, 1, and 2-bed rental in Bay Area",
+    subtitle = "2000-2018",
+    x="",
+    y=""
+  ) +
+  theme_light() +
+  theme(legend.position="none")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(strip.text.x = element_text(size = 6)) +
+  scale_y_continuous(labels = scales::percent)
+
+
+```
+
+
 # Challenge 2: 2016 California Contributors plots
 
 As discussed in class, I would like you to reproduce the plot that shows the top ten cities in highest amounts raised in political contributions in California during the 2016 US Presidential election.
@@ -616,9 +661,43 @@ While this is ok, what if one asked you to create the same plot for the top 10 c
 ```{r, load_CA_data, warnings= FALSE, message=FALSE}
 # Make sure you use vroom() as it is significantly faster than read.csv()
 CA_contributors_2016 <- vroom::vroom(here::here("data","CA_contributors_2016.csv"))
+zip_codes <- vroom::vroom(here::here("data","zip_code_database.csv"))
+
+glimpse(CA_contributors_2016)
+glimpse(zip_codes)
+
+```
+
+```{r}
+contributions_filtered <- CA_contributors_2016 %>% 
+  filter(cand_nm == "Clinton, Hillary Rodham" | cand_nm == "Trump, Donald J.") %>% 
+  mutate(zip = as.character(zip))
+
+contributions_filtered <- left_join(contributions_filtered, zip_codes, by="zip")
+
+
+top10 <- contributions_filtered %>% 
+  group_by(cand_nm, primary_city) %>% 
+  summarize(sum_donations = sum(contb_receipt_amt)) %>% 
+  slice_max(order_by = sum_donations, n = 10)
+  
+top10
+
+ggplot(top10, aes(x=sum_donations, y = primary_city)) +
+  geom_col(aes(fill = factor(cand_nm))) +
+  facet_wrap(~cand_nm, scales = "free") +
+  labs(
+    title = "Where did candidates rase most money",
+    y = ""
+  ) +
+  theme_light() +
+  scale_fill_manual(values = c("#2E74C0", "#CB454A")) +
+  theme(legend.position="none") +
+  scale_x_continuous(labels=scales::dollar_format()) 
 
 
 ```
+
 
 # Deliverables
 
