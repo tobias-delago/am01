@@ -151,7 +151,10 @@ ggplot(median_per_bed, aes(x=year, y=median_price, color = factor(beds))) +
   theme_light() +
   theme(legend.position="none") +
   theme(plot.title = element_text(hjust = -0.15))+
-  theme(plot.subtitle = element_text(hjust = -0.08))
+  theme(plot.subtitle = element_text(hjust = -0.08)) +
+  theme(strip.text.x = element_text(colour = "black")) +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 0.5)) +
+  theme(strip.background = element_rect(color = "black", size = 0.5))
   
 ```
 
@@ -185,7 +188,10 @@ ggplot(median_per_bed, aes(x=year, y=median_price, color = factor(city))) +
   ) +
   theme_light() +
   theme(legend.position="none") +
-  theme(plot.title = element_text(hjust = -0.15))
+  theme(plot.title = element_text(hjust = -0.15)) +
+  theme(strip.text.x = element_text(colour = "black")) +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 0.5)) +
+  theme(strip.background = element_rect(color = "black", size = 0.5))
 
 ```
 
@@ -623,7 +629,7 @@ combined <- merge(filtered_rent,total_per_year, by=c("city","beds"), all.x=TRUE,
 combined <- combined %>% 
   mutate(proportion = n/count_all_years)
 
-combined
+View(combined)
   
 
 ggplot(combined, aes(x=year, y = proportion, color = factor(city))) +
@@ -639,7 +645,10 @@ ggplot(combined, aes(x=year, y = proportion, color = factor(city))) +
   theme(legend.position="none")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   theme(strip.text.x = element_text(size = 6)) +
-  scale_y_continuous(labels = scales::percent)
+  scale_y_continuous(labels = scales::percent) +
+  theme(strip.text = element_text(colour = "black")) +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 0.5)) +
+  theme(strip.background = element_rect(color = "black", size = 0.5))
 
 
 ```
@@ -669,35 +678,6 @@ glimpse(zip_codes)
 
 ```
 
-```{r}
-contributions_filtered <- CA_contributors_2016 %>% 
-  filter(cand_nm == "Clinton, Hillary Rodham" | cand_nm == "Trump, Donald J.") %>% 
-  mutate(zip = as.character(zip))
-
-contributions_filtered <- left_join(contributions_filtered, zip_codes, by="zip")
-
-
-top10 <- contributions_filtered %>% 
-  group_by(cand_nm, primary_city) %>% 
-  summarize(sum_donations = sum(contb_receipt_amt)) %>% 
-  slice_max(order_by = sum_donations, n = 10)
-  
-top10
-
-ggplot(top10, aes(x=sum_donations, y = primary_city)) +
-  geom_col(aes(fill = factor(cand_nm))) +
-  facet_wrap(~cand_nm, scales = "free") +
-  labs(
-    title = "Where did candidates rase most money",
-    y = ""
-  ) +
-  theme_light() +
-  scale_fill_manual(values = c("#2E74C0", "#CB454A")) +
-  theme(legend.position="none") +
-  scale_x_continuous(labels=scales::dollar_format()) 
-
-
-```
 
 
 ```{r}
@@ -720,13 +700,17 @@ contributions_filtered %>%
     facet_wrap(~cand_nm, scales = "free") +
     labs(
       title = "Where did candidates rase most money",
-      y = ""
+      y = "",
+      x = "Amount raised"
     ) +
     scale_y_reordered() +
     theme_light() +
     scale_fill_manual(values = c("#2E74C0", "#CB454A")) +
+    scale_x_continuous(labels=scales::dollar_format())+
     theme(legend.position="none") +
-    scale_x_continuous(labels=scales::dollar_format())
+    theme(strip.text.x = element_text(colour = "black")) +
+    theme(panel.border = element_rect(color = "black", fill = NA, size = 0.5)) +
+    theme(strip.background = element_rect(color = "black", size = 0.5))
     
 
 
