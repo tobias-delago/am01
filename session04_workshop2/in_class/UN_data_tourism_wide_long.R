@@ -19,7 +19,7 @@ un_tourism_data <- fread(input = url,
 # to save the data file, so you can load it locally
 # write_csv(un_tourism_data, "un_tourism_data.csv")
 
-# un_tourism_data <- read_csv(here::here("data", "un_tourism_data"))
+un_tourism_data <- read_csv(here::here("data", "un_tourism_data"))
 
 skimr::skim(un_tourism_data)
 
@@ -33,7 +33,7 @@ tourism_wide <-  un_tourism_data %>%
   )
 
 
-skim(tourism_wide)
+glimpse(tourism_wide)
 
 tourism_wide <- tourism_wide %>% 
   filter(!is.na(tourism_expenditure), 
