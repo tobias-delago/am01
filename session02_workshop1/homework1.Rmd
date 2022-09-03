@@ -41,6 +41,7 @@ library(tidyquant)
 library(knitr)
 library(ggrepel)
 library(spotifyr)
+library(tidytext)
 ```
 
 # Rents in San Francsisco 2000-2018
@@ -698,6 +699,38 @@ ggplot(top10, aes(x=sum_donations, y = primary_city)) +
 
 ```
 
+
+```{r}
+contributions_filtered <- CA_contributors_2016 %>% 
+  filter(cand_nm == "Clinton, Hillary Rodham" | cand_nm == "Trump, Donald J.") %>% 
+  mutate(zip = as.character(zip))
+
+contributions_filtered <- left_join(contributions_filtered, zip_codes, by="zip")
+
+
+contributions_filtered %>%
+  group_by(cand_nm, primary_city) %>%
+  summarize(sum_donations = sum(contb_receipt_amt)) %>%
+  slice_max(order_by = sum_donations, n = 10) %>% 
+  ungroup %>%
+  mutate(cand_nm = as.factor(cand_nm), 
+         primary_city = reorder_within(primary_city, sum_donations, cand_nm)) %>% 
+  ggplot(aes(x = sum_donations, y = primary_city, fill = factor(cand_nm))) +
+    geom_col() +
+    facet_wrap(~cand_nm, scales = "free") +
+    labs(
+      title = "Where did candidates rase most money",
+      y = ""
+    ) +
+    scale_y_reordered() +
+    theme_light() +
+    scale_fill_manual(values = c("#2E74C0", "#CB454A")) +
+    theme(legend.position="none") +
+    scale_x_continuous(labels=scales::dollar_format())
+    
+
+
+```
 
 # Deliverables
 
