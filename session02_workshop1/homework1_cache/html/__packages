@@ -24,3 +24,5 @@ PerformanceAnalytics
 TTR
 quantmod
 tidyquant
+knitr
+ggrepel

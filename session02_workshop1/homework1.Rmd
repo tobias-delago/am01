@@ -23,7 +23,7 @@ options(digits = 3)
 # default figure size
 knitr::opts_chunk$set(
   fig.width=6.75, 
-  fig.height=6.75,
+  fig.height=5,  #6.75 was original
   fig.align = "center"
 )
 ```
@@ -38,6 +38,9 @@ library(skimr)
 library(janitor)
 library(vroom)
 library(tidyquant)
+library(knitr)
+library(ggrepel)
+library(spotifyr)
 ```
 
 # Rents in San Francsisco 2000-2018
@@ -83,12 +86,11 @@ What are the variable types? Do they all correspond to what they really are? Whi
 # YOUR CODE GOES HERE
 skimr::skim(rent)
 glimpse(rent)
-View(rent) # Testing only
 
 ```
-Variable types: chr & dbl\
-Do they correspond: Date could be formatted at POSIX
-Most missing: descr 197542
+>Variable types: chr & dbl\
+>Do they correspond: Date could be formatted as <date>\
+>Most missing: descr (197542)
 
 
 Make a plot that shows the top 20 cities in terms of % of classifieds between 2000-2018. You need to calculate the number of listings by city, and then convert that number to a %.
@@ -112,10 +114,14 @@ ggplot(data = top20, mapping = aes(x=proportion, y=city)) +
   geom_col() +
   labs(
     title = "San Francisco accounts for more than a quarter of all rental classifieds",
-    subtitle = "% of Craigslist, 2000-2018"
+    subtitle = "% of Craigslist, 2000-2018",
+    x = "",
+    y = ""
   ) +
   scale_x_continuous(labels = scales::percent) +
-  theme_light()
+  theme_light() +
+  theme(plot.title = element_text(hjust = -2.25))+
+  theme(plot.subtitle = element_text(hjust = -0.19))
   
 
 ```
@@ -168,8 +174,6 @@ median_per_bed <- rent %>%
   #summarize(total_median = median(median_price)) %>% 
   #slice_max(order_by = total_median, n=12)
 
-top_cities
-
 ggplot(median_per_bed, aes(x=year, y=median_price, color = factor(city))) +
   geom_line() +
   facet_wrap(~city, nrow = 3) +
@@ -184,20 +188,19 @@ ggplot(median_per_bed, aes(x=year, y=median_price, color = factor(city))) +
 
 ```
 
-```
-
 What can you infer from these plots? Don't just explain what's in the graph, but speculate or tell a short story (1-2 paragraphs max).
 
 > TYPE YOUR ANSWER AFTER (AND OUTSIDE!) THIS BLOCKQUOTE.
 
 Looking at the graphs from the last exercise we can see that rental prices have increased since the year 2000. It is speculated that this is not only caused by inflation, but also by the higher request for apartments since large tech-companies have increased the attractiveness of the Bay Area (law of demand and supply).\ 
-However, the figures also reveal that there has been a minor growth rate (or even decline) after 2015. A phenomenon that could be due to the fact that more and more people are leaving California as the boom seems to lose momentum. A CNBC (video)[https://www.youtube.com/watch?v=Ez90rXhMWjE] outlines the reasons of the exodus. 
+However, the figures also reveal that there has been a minor growth rate (or even decline) after 2015. A phenomenon that could be due to the fact that more and more people are leaving California as the boom seems to lose momentum. A CNBC [video](https://www.youtube.com/watch?v=Ez90rXhMWjE) outlines the reasons of the exodus. 
 
 # Analysis of movies- IMDB dataset
 
 We will look at a subset sample of movies, taken from the [Kaggle IMDB 5000 movie dataset](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)
 
-```{r,load_movies, warning=FALSE, message=FALSE, eval=FALSE}
+```{r load_movies}
+# warning=FALSE, message=FALSE, eval=FALSE
 
 movies <- read_csv(here::here("data", "movies.csv"))
 glimpse(movies)
@@ -208,7 +211,7 @@ Besides the obvious variables of `title`, `genre`, `director`, `year`, and `dura
 
 -   `gross` : The gross earnings in the US box office, not adjusted for inflation
 -   `budget`: The movie's budget
--   `cast_facebook_likes`: the number of facebook likes cast memebrs received
+-   `cast_facebook_likes`: the number of facebook likes cast members received
 -   `votes`: the number of people who voted for (or rated) the movie in IMDB
 -   `reviews`: the number of reviews for that movie
 -   `rating`: IMDB average rating
@@ -216,30 +219,122 @@ Besides the obvious variables of `title`, `genre`, `director`, `year`, and `dura
 ## Use your data import, inspection, and cleaning skills to answer the following:
 
 -   Are there any missing values (NAs)? Are all entries distinct or are there duplicate entries?
+```{r}
+# Counts the NA for each row and outputs only rows with at least one NA, all columns outputted
+movies[rowSums(is.na(movies))!=0,]
+#Find duplicate entries by looking at title
+movies[duplicated(movies$title) | duplicated(movies$title, fromLast=TRUE),]
+```
+> There are no missing values but various double/triple entries (107 rows affected)
+
 -   Produce a table with the count of movies by genre, ranked in descending order
+```{r}
+kable(movies %>% 
+  group_by(genre) %>% 
+  summarise(count_per_genre = n()) %>% 
+  arrange(desc(count_per_genre)))
+```
+
+
 -   Produce a table with the average gross earning and budget (`gross` and `budget`) by genre. Calculate a variable `return_on_budget` which shows how many \$ did a movie make at the box office for each \$ of its budget. Ranked genres by this `return_on_budget` in descending order
+
+```{r}
+kable(movies %>% 
+  group_by(genre) %>% 
+  summarize(mean_gross = mean(gross), mean_budget = mean(budget)) %>% 
+  mutate(return_on_budget = mean_gross/mean_budget) %>% 
+  arrange(desc(return_on_budget)))
+```
+
+
 -   Produce a table that shows the top 15 directors who have created the highest gross revenue in the box office. Don't just show the total gross amount, but also the mean, median, and standard deviation per director.
+```{r}
+kable(movies %>% 
+  group_by(director) %>% 
+  summarize(total_gross = sum(gross), mean_gross = mean(gross), median_gross = median(gross), sd_gross = sd(gross)) %>% 
+  arrange(desc(total_gross)) %>% 
+  slice_max(order_by = total_gross, n=15))
+  
+```
+
+
 -   Finally, ratings. Produce a table that describes how ratings are distributed by genre. We don't want just the mean, but also, min, max, median, SD and some kind of a histogram or density graph that visually shows how ratings are distributed.
+
+```{r}
+kable(movies %>% 
+  group_by(genre) %>% 
+  summarize(mean_rating = mean(rating), min_rating = min(rating), max_rating=max(rating), median_rating=median(rating),sd_rating = sd(rating), number_ratings=n()) %>% 
+  arrange(desc(mean_rating)))
+
+```
+
+```{r}
+movies_filtered <- movies %>% 
+  filter(genre != "Thriller")
+
+ggplot(movies_filtered, aes(x = rating)) +
+  geom_density() +
+  facet_wrap(~genre, nrow = 4) +
+  labs(
+    title = "Ratings distribution by genre",
+    subtitle = "Only thriller rating = 4.8"
+  ) +
+  theme_light()
+
+```
+
+
 
 ## Use `ggplot` to answer the following
 
 -   Examine the relationship between `gross` and `cast_facebook_likes`. Produce a scatterplot and write one sentence discussing whether the number of facebook likes that the cast has received is likely to be a good predictor of how much money a movie will make at the box office. What variable are you going to map to the Y- and X- axes?
 
 ```{r, gross_on_fblikes}
+ggplot(movies, aes(x = cast_facebook_likes, y = gross)) +
+  geom_point() +
+  xlim(0,100000) +
+  geom_smooth(method = "lm", se = FALSE)+
+  labs(
+    title="Correlation between cast Facebook likes and movie revenue"
+  )
 
+correlation_likes <- cor(movies$cast_facebook_likes,movies$gross)
+correlation_likes
 ```
+> Although there is a minor tendency, the available data does not lead to the conclusion that cast facebook likes are a clear predictor for how much money the movie will make (correlation <0.3)
 
 -   Examine the relationship between `gross` and `budget`. Produce a scatterplot and write one sentence discussing whether budget is likely to be a good predictor of how much money a movie will make at the box office.
 
 ```{r, gross_on_budget}
+ggplot(movies, aes(x = budget, y = gross)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  labs(
+    title="Correlation between budget and movie revenue"
+  )
 
+correlation_budget <- cor(movies$budget,movies$gross)
+correlation_budget
 ```
+> Although there are some outliers, budget seems to be a fairly good predictor of how much money the movie will make (correlation above 0.5)
 
 -   Examine the relationship between `gross` and `rating`. Produce a scatterplot, faceted by `genre` and discuss whether IMDB ratings are likely to be a good predictor of how much money a movie will make at the box office. Is there anything strange in this dataset?
 
 ```{r, gross_on_rating}
+ggplot(movies_filtered, aes(x = rating, y = gross)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  labs(
+    title="Correlation between rating and movie revenue"
+  ) +
+  facet_wrap(~genre, scales="free")+
+  theme(axis.text.y=element_blank())
 
+correlation_rating <- cor(movies$rating,movies$gross)
+correlation_rating
 ```
+
+> There is no overall tendency that the higher the ratings, the higher the gross revenue (correlation < 0.3) - some genres e.g. documentary even have a negative relationship.
 
 # Returns of financial stocks
 
@@ -251,6 +346,7 @@ We must first identify which stocks we want to download data for, and for this w
 
 ```{r load_nyse_data, message=FALSE, warning=FALSE}
 nyse <- read_csv(here::here("data","nyse.csv"))
+glimpse(nyse)
 ```
 
 Based on this dataset, create a table and a bar plot that shows the number of companies per sector, in descending order
@@ -258,7 +354,14 @@ Based on this dataset, create a table and a bar plot that shows the number of co
 ```{r companies_per_sector}
 
 # YOUR CODE GOES HERE
+nyse_sectors <- nyse %>% 
+  count(sector, sort=TRUE) %>% 
+  mutate(sector = fct_reorder(sector, n))
 
+kable(nyse_sectors)
+
+ggplot(nyse_sectors, aes(x = n, y = sector)) +
+  geom_col()
 
 ```
 
@@ -268,7 +371,7 @@ Next, let's choose some stocks and their ticker symbols and download some data. 
 # Notice the cache=TRUE argument inthe chunk options. Because getting data is time consuming, 
 # cache=TRUE means that once it downloads data, the chunk will not run again next time you knit your Rmd
 
-myStocks <- c("AAPL","JPM","DIS","DPZ","ANF","TSLA","XOM","SPY" ) %>%
+myStocks <- c("AAPL", "JPM", "DIS","DPZ","ANF","TSLA","SPY" ) %>%
   tq_get(get  = "stock.prices",
          from = "2011-01-01",
          to   = "2022-08-31") %>%
@@ -287,7 +390,7 @@ myStocks_returns_daily <- myStocks %>%
                period     = "daily", 
                type       = "log",
                col_rename = "daily_returns",
-               cols = c(nested.col))  
+               cols = c(nested.col)) 
 
 #calculate monthly  returns
 myStocks_returns_monthly <- myStocks %>%
@@ -300,7 +403,7 @@ myStocks_returns_monthly <- myStocks %>%
 
 #calculate yearly returns
 myStocks_returns_annual <- myStocks %>%
-  group_by(symbol) %>%
+  #group_by(symbol) %>%
   tq_transmute(select     = adjusted, 
                mutate_fun = periodReturn, 
                period     = "yearly", 
@@ -313,7 +416,10 @@ Create a table where you summarise monthly returns for each of the stocks and `S
 
 ```{r summarise_monthly_returns}
 
-# YOUR CODE GOES HERE
+kable(myStocks_returns_monthly %>% 
+  group_by(symbol) %>% 
+  summarize(min_return = min(monthly_returns), max_return = max(monthly_returns), median_return = median(monthly_returns), mean_return = mean(monthly_returns), sd_return = sd(monthly_returns)))
+
 
 ```
 
@@ -322,6 +428,9 @@ Plot a density plot, using `geom_density()`, for each of the stocks
 ```{r density_monthly_returns}
 
 # YOUR CODE GOES HERE
+ggplot(myStocks_returns_monthly, aes(x=monthly_returns)) +
+  geom_density() +
+  facet_wrap(~symbol)
 
 ```
 
@@ -329,10 +438,19 @@ What can you infer from this plot? Which stock is the riskiest? The least risky?
 
 > TYPE YOUR ANSWER AFTER (AND OUTSIDE!) THIS BLOCKQUOTE.
 
+A broad curve means that we have a large variance in outcome and thus higher risk. It appears that Tesla is the riskiest asset in our portfolio and the SP500 ETF the least risky. 
+
 Finally, make a plot that shows the expected monthly return (mean) of a stock on the Y axis and the risk (standard deviation) in the X-axis. Please use `ggrepel::geom_text_repel()` to label each stock
 
 ```{r risk_return_plot}
 # YOUR CODE GOES HERE
+mean_sd_return <- myStocks_returns_monthly %>% 
+  group_by(symbol) %>% 
+  summarize(mean_return = mean(monthly_returns), sd_return = sd(monthly_returns))
+
+ggplot(mean_sd_return, aes(x=sd_return, y = mean_return, label=symbol))+
+  geom_point(shape=23, fill="black") +
+  geom_text_repel()
 
 ```
 
@@ -340,9 +458,13 @@ What can you infer from this plot? Are there any stocks which, while being riski
 
 > TYPE YOUR ANSWER AFTER (AND OUTSIDE!) THIS BLOCKQUOTE.
 
+Yes Abercrombie & Fitch is risky but still provides low returns. This poor performance aligns with the bad news on the company over the recent years (scandals, decline in sales, store closure etc.)
+
 # On your own: Spotify
 
 Spotify have an API, an Application Programming Interface. APIs are ways for computer programs to talk to each other. So while we use Spotify app to look up songs and artists, computers use the Spotify API to talk to the spotify server. There is an R package that allows R to talk to this API: [`spotifyr`](https://www.rcharlie.com/spotifyr/). One of your team members, need to sign up and get a [Spotify developer account](https://developer.spotify.com/dashboard/) and then you can download data about one's Spotify usage. A detailed article on how to go about it can be found here [Explore your activity on Spotify with R and *spotifyr*](https://towardsdatascience.com/explore-your-activity-on-spotify-with-r-and-spotifyr-how-to-analyze-and-visualize-your-stream-dee41cb63526)
+
+> Still waiting to get my Data request approved by Spotify
 
 If you do not want to use the API, you can download a sample of over 32K songs by having a look at <https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-01-21/readme.md>
 
@@ -350,6 +472,7 @@ If you do not want to use the API, you can download a sample of over 32K songs b
 
 spotify_songs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
 
+glimpse(spotify_songs)
 
 ```
 
@@ -386,10 +509,87 @@ In this dataset, there are only 6 types of `playlist_genre` , but we can still t
 Produce a one-page summary describing this dataset. Here is a non-exhaustive list of questions:
 
 1.  What is the distribution of songs' popularity (`track_popularity`). Does it look like a Normal distribution?
+
+```{r}
+ggplot(spotify_songs, aes(x = track_popularity)) +
+  geom_histogram(bins= 100)
+```
+
+
 2.  There are 12 [audio features](https://developer.spotify.com/documentation/web-api/reference/object-model/#audio-features-object) for each track, including confidence measures like `acousticness`, `liveness`, `speechines`and `instrumentalness`, perceptual measures like `energy`, `loudness`, `danceability` and `valence` (positiveness), and descriptors like `duration`, `tempo`, `key`, and `mode`. How are they distributed? can you roughly guess which of these variables is closer to Normal just by looking at summary statistics?
+
+```{r}
+spotify_songs_filtered <- spotify_songs %>% 
+  select(c("danceability", "energy", "key", "loudness", "mode", "speechiness", "acousticness",
+           "instrumentalness", "liveness", "valence", "tempo", "duration_ms"))
+
+ggplot(gather(spotify_songs_filtered), aes(value)) + 
+    geom_histogram(bins = 100) + 
+    facet_wrap(~key, scales="free")
+
+```
+```{r}
+summary(spotify_songs_filtered)
+```
+It can be guessed by summary statistics how the data is distributed (histogramm or additional tests such as Shapiro Wilk Test would yield higher precision). First of all, the mean and the median should almost be the same, second the quartiles can give additional hints (same distance etc.).
+Mode e.g by nature can't be normally distributed as only 2 values are possible. E.g. Acousticness isn't normally distributed at all, significantly skewed to the right.\
+Duration and danceability e.g. on the other hand are by far distributed more normally.
+
+
 3.  How are `job_satisfaction` and `work_life_balance` distributed? Don't just report counts, but express categories as % of total
+> ?
+
 4.  Is there any relationship between `valence` and `track_popularity`? `danceability` and `track_popularity` ?
+
+```{r}
+ggplot(spotify_songs, aes(x = valence, y = track_popularity)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  labs(
+    title="Correlation between valence and track_popularity"
+  )
+
+correlation_rating_valence <- cor(spotify_songs$valence,spotify_songs$track_popularity)
+correlation_rating_valence
+
+ggplot(spotify_songs, aes(x = danceability, y = track_popularity)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  labs(
+    title="Correlation between danceability and track_popularity"
+  )
+
+correlation_rating_danceability <- cor(spotify_songs$danceability,spotify_songs$track_popularity)
+correlation_rating_danceability
+```
+There is absolutely no relationship between the values indicated. 
+
 5.  `mode` indicates the modality (major or minor) of a track, the type of scale from which its melodic content is derived. Major is represented by 1 and minor is 0. Do songs written on a major scale have higher `danceability` compared to those in minor scale? What about `track_popularity`?
+
+```{r}
+ggplot(spotify_songs, aes(x = danceability)) +
+  geom_density() +
+  labs(
+    title="Danceability according to mode"
+  ) +
+  facet_wrap(~mode)
+
+spotify_songs %>% 
+  group_by(mode) %>% 
+  summarize(mean_danceability = mean(danceability), median_danceability = median(danceability))
+
+ggplot(spotify_songs, aes(x = track_popularity)) +
+  geom_density() +
+  labs(
+    title="Track popularity according to mode"
+  ) +
+  facet_wrap(~mode)
+
+spotify_songs %>% 
+  group_by(mode) %>% 
+  summarize(mean_track_popularity = mean(track_popularity), median_track_popularity = median(track_popularity))
+```
+While almost the same, minor is slightly more danceable and major is slightly more popular. 
 
 # Challenge 1: Replicating a chart
 
