@@ -26,3 +26,5 @@ quantmod
 tidyquant
 knitr
 ggrepel
+spotifyr
+tidytext
