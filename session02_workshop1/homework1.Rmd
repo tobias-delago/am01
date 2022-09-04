@@ -8,7 +8,6 @@ output:
     highlight: zenburn
     number_sections: yes
     toc: yes
-    toc_float: yes
     code_folding: show
 ---
 
@@ -46,7 +45,7 @@ library(tidyquant)
 
 [What impact does new housing have on rents, displacement, and gentrification in the surrounding neighborhood? Read our interview with economist Kate Pennington about her article, "Does Building New Housing Cause Displacement?:The Supply and Demand Effects of Construction in San Francisco."](https://matrix.berkeley.edu/research-article/kate-pennington-on-gentrification-and-displacement-in-san-francisco/)
 
-In our case, we have a clean(ish) dataset with about 200K rows tht corresponf to Craigslist listings for renting properties in the greater SF area. The data dictionary is as follows
+In our case, we have a clean(ish) dataset with about 200K rows that correspond to Craigslist listings for renting properties in the greater SF area. The data dictionary is as follows
 
 | variable    | class     | description           |
 |-------------|-----------|-----------------------|
@@ -106,7 +105,7 @@ Make a plot that shows the evolution of median prices in San Francisco for 0, 1,
 
 ```
 
-Finally, make a plot that shows median rental prices for the top 2 cities in the Bay area. Your final graph should look like this
+Finally, make a plot that shows median rental prices for the top 12 cities in the Bay area. Your final graph should look like this
 
 ![](images/one_bed_bay_area.png)
 
@@ -313,15 +312,14 @@ Produce a one-page summary describing this dataset. Here is a non-exhaustive lis
 
 1.  What is the distribution of songs' popularity (`track_popularity`). Does it look like a Normal distribution?
 2.  There are 12 [audio features](https://developer.spotify.com/documentation/web-api/reference/object-model/#audio-features-object) for each track, including confidence measures like `acousticness`, `liveness`, `speechines`and `instrumentalness`, perceptual measures like `energy`, `loudness`, `danceability` and `valence` (positiveness), and descriptors like `duration`, `tempo`, `key`, and `mode`. How are they distributed? can you roughly guess which of these variables is closer to Normal just by looking at summary statistics?
-3.  How are `job_satisfaction` and `work_life_balance` distributed? Don't just report counts, but express categories as % of total
-4.  Is there any relationship between `valence` and `track_popularity`? `danceability` and `track_popularity` ?
-5.  `mode` indicates the modality (major or minor) of a track, the type of scale from which its melodic content is derived. Major is represented by 1 and minor is 0. Do songs written on a major scale have higher `danceability` compared to those in minor scale? What about `track_popularity`?
+3.  Is there any relationship between `valence` and `track_popularity`? `danceability` and `track_popularity` ?
+4.  `mode` indicates the modality (major or minor) of a track, the type of scale from which its melodic content is derived. Major is represented by 1 and minor is 0. Do songs written on a major scale have higher `danceability` compared to those in minor scale? What about `track_popularity`?
 
 # Challenge 1: Replicating a chart
 
 The purpose of this exercise is to reproduce a plot using your `dplyr` and `ggplot2` skills. It builds on exercise 1, the San Francisco rentals data.
 
-You have to create a graph that calculates the cumulative % change for 0-, 1-1, and 2-bed flats between 2000 and 2018 for the top twelve cities in Bay Area, by number of ads that appeared in Craigslist. Your final graph should look like this
+You have to create a graph that calculates the cumulative % change in median rental prices for 0-, 1-, and 2-bed flats between 2000 and 2018 for the top twelve cities in Bay Area, by number of ads that appeared in Craigslist. Your final graph should look like this
 
 ![](images/challenge1.png)
 
