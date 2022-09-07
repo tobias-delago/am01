@@ -1,6 +1,6 @@
 ---
 title: "Session 4: Homework 2"
-author: "Study group and members' names go here"
+author: "Group 11: Vani Duggal, Mehak Khanna, Manon Pillot, Nick Chen, Liyang Zhang, Tobias Delago"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -46,6 +46,8 @@ library(wbstats)
 library(countrycode)
 library(patchwork)
 library(gganimate)
+library(infer)
+library(lubridate)
 ```
 
 # Climate change and temperature anomalies
@@ -69,6 +71,8 @@ weather <-
   read_csv("https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.csv", 
            skip = 1, 
            na = "***")
+
+glimpse(weather)
 
 ```
 
@@ -105,6 +109,15 @@ You have two objectives in this section:
     `month`, and the temperature deviation values as `delta`.
 
 ```{r tidyweather}
+weather_selected <- weather %>% 
+  select(1:13)
+
+tidyweather <- weather_selected %>% 
+  pivot_longer(cols = 2:13,
+               names_to = "month",
+               values_to = "delta") 
+
+tidyweather
 
 ```
 
@@ -128,16 +141,18 @@ chronologically.
 > document, you must delete `eval=FALSE`, **not just here but in all
 > chunks were `eval=FALSE` appears.**
 
-```{r scatter_plot, eval=FALSE}
+```{r scatter_plot}
 
 tidyweather <- tidyweather %>%
-  mutate(date = ymd(paste(as.character(Year), Month, "1")),
-         month = month(date, label=TRUE),
-         year = year(date))
+  mutate(date = ymd(paste(as.character(Year), month, "1")),
+         month = month(date, label=TRUE))
+         #Year = year(date))
+
+tidyweather
 
 ggplot(tidyweather, aes(x=date, y = delta))+
   geom_point()+
-  geom_smooth(color="red") +
+  geom_smooth(color="red", se = FALSE) +
   theme_bw() +
   labs (
     title = "Weather Anomalies"
@@ -153,9 +168,20 @@ abbreviated month names are fine), not `1`, `2`, `3`.
 
 ```{r facet_wrap, echo=FALSE}
 
-#Your code goes here...
+ggplot(tidyweather, aes(x=date, y = delta))+
+  geom_point()+
+  geom_smooth(color="red", se = FALSE) +
+  facet_wrap(~month) +
+  theme_bw() +
+  labs (
+    title = "Weather Anomalies"
+  )
+
 
 ```
+**Answer:**
+It looks like the colder months (Oct to April) have increased more significantly (steeper slope) than the summer months. This can also be confirmed by a report from the US Environmental Protection Agency which highlights that overall, minimum temperatures have increased at a higher rate than average maximum temperatures.
+
 
 It is sometimes useful to group data into different time periods to
 study historical data. For example, we often refer to decades such as
@@ -183,6 +209,7 @@ comparison <- tidyweather %>%
     TRUE ~ "2011-present"
   ))
 
+
 ```
 
 Inspect the `comparison` dataframe by clicking on it in the
@@ -195,7 +222,12 @@ the different time periods we are interested in. Set `fill` to
 
 ```{r density_plot, eval=FALSE}
 
-
+ggplot(comparison, aes(x = delta, fill = interval)) +
+  geom_density(alpha = 0.5)+
+  labs (
+    title = "Weather Anomalies by Period"
+  ) +
+  theme_bw()
 
 ```
 
@@ -212,18 +244,19 @@ average_annual_anomaly <- tidyweather %>%
   
   # creating summaries for mean delta 
   # use `na.rm=TRUE` to eliminate NA (not available) values 
-  summarise(......) 
+  summarise(meanDelta = mean(delta, na.rm=TRUE)) 
 
 #plotting the data:
 
-
-  
+ggplot(average_annual_anomaly, aes(x = Year, y = meanDelta)) +
+  geom_point()+
   #Fit the best fit line, using LOESS method
-
-  
+  geom_smooth(method="loess", colour="red")+
+  labs (
+    title = "Weather Anomalies by Period"
+  ) +
   #change theme to theme_bw() to have white background + black frame around plot
-                        
-
+  theme_bw()
 
 ```
 
@@ -244,17 +277,42 @@ with the `infer` package. Recall that the dataframe `comparison` has
 already grouped temperature anomalies according to time intervals; we
 are only interested in what is happening between 2011-present.
 
-```{r, calculate_CI_using_formula, eval=FALSE}
+```{r, calculate_CI_using_formula}
 
 formula_ci <- comparison %>% 
-
+  
   # choose the interval 2011-present
-  # what dplyr verb will you use? 
-
+  # what dplyr verb will you use?
+  filter(interval == "2011-present") %>% 
+  group_by(interval) %>% 
+  
   # calculate summary statistics for temperature deviation (delta) 
   # calculate mean, SD, count, SE, lower/upper 95% CI
   # what dplyr verb will you use? 
+  summarize(mean = mean(delta, na.rm=TRUE),
+            sd = sd(delta, na.rm=TRUE),
+            count = n(),
+            t_critical = qt(0.975, count-1),
+            se_delta = sd/sqrt(count),
+            margin_of_error = t_critical * se_delta,
+            delta_low = mean - margin_of_error,
+            delta_high = mean + margin_of_error)
 
+
+set.seed(1234)
+
+boot_delta <- comparison %>% 
+  filter(interval == "2011-present") %>% 
+  specify(response = delta) %>% 
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat="mean")
+
+bootstrap_ci <- boot_delta %>% 
+  get_confidence_interval(level =0.95, type = "percentile")
+
+bootstrap_ci
+  
+   
 #print out formula_CI
 formula_ci
 ```
@@ -262,6 +320,8 @@ formula_ci
 > What is the data showing us? Please type your answer after (and
 > outside!) this blockquote. You have to explain what you have done, and
 > the interpretation of the result. One paragraph max, please!
+
+I started by calculating the lower and upper boundary with the formula. This is done by using the t-distribution available in R (qt) and multiplying it with the standard error. The bootstrap simulation on the other hand creates 1000 repetitions out of the given data (delta in this case) and uses the get_confidence_interval function from the infer package to create the delta_low and delta_high value. First of all it can be said that with 1000 iterations, the bootstrap simulation yields the exact same results as the formula. Further the count (144) allows to have a low t_critical as well as a small standard error, producing a quite narrow confidence interval. 
 
 
 # Biden's Approval Margins
@@ -276,8 +336,19 @@ approval_polllist <- read_csv('https://projects.fivethirtyeight.com/biden-approv
 
 glimpse(approval_polllist)
 
-# Use `lubridate` to fix dates, as they are given as characters.
+
 ```
+
+```{r}
+# Use `lubridate` to fix dates, as they are given as characters.
+
+approval_date <- approval_polllist %>% 
+  mutate(enddate = mdy(enddate))
+
+glimpse(approval_date)
+
+```
+
 
 ## Create a plot
 
@@ -290,6 +361,48 @@ something like this:
 
 ```{r trump_margins, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "biden_approval_margin.png"), error = FALSE)
+```
+
+
+```{r, fig.height=4}
+poll_filtered <- approval_date %>% 
+  select(c("enddate","subgroup","approve","disapprove")) %>% 
+  filter(enddate >= "2022-01-01") %>% 
+  mutate(week = week(enddate),
+         dif = approve-disapprove)
+
+ci_biden_facet <- poll_filtered %>% 
+  group_by(week, subgroup) %>% 
+  summarize(mean = mean(dif, na.rm=TRUE),
+            sd = sd(dif, na.rm=TRUE),
+            count = n(),
+            t_critical = qt(0.975, count-1),
+            se_diff = sd/sqrt(count),
+            margin_of_error = t_critical * se_diff,
+            diff_low = mean - margin_of_error,
+            diff_high = mean + margin_of_error)
+
+
+#ci_biden_tidy <- ci_biden %>%
+  #select(c("week", "mean", "diff_low", "diff_high")) %>% 
+  #pivot_longer(cols = 2:4,
+               #names_to = "metric",
+               #values_to = "value") 
+
+ggplot(ci_biden_facet, aes(x = week, y = mean, color = subgroup)) +
+  geom_line() +
+  geom_ribbon(aes(x=week, y=mean, ymax=diff_high, ymin=diff_low, color = subgroup), linetype=1, size = 0.9, fill = "brown", alpha=0.1)+
+  facet_wrap(~subgroup, ncol = 1, strip.position="right") +
+  labs(
+    title = "Biden's net Approval Ratings in 2022",
+    subtitle = "weekly data, approval - disapproval, %",
+    y = NULL, 
+    x = "Week in 2022"
+  ) +
+  theme_bw() +
+  theme(legend.position="none")
+
+
 ```
 
 # Challenge 1: Excess rentals in TfL bike sharing
