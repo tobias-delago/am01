@@ -43,6 +43,7 @@ library(broom)
 library(tidyquant)
 library(infer)
 library(openintro)
+library(gapminder)
 ```
 
 
@@ -62,9 +63,16 @@ library(openintro)
 
 ```{r}
 
+my_colours <- c("grey90", "#001e62")
+
+
+ggplot(gapminder, aes(x=year, y = lifeExp, color = country)) +
+  geom_line() +
 
 
 ```
+
+
 
 # `NA`s in vectors
 
@@ -107,6 +115,16 @@ add_one(1)
 
 - For `age()` use the `sample()` function to sample 50 numbers from 25 to 50 with replacement.
 
+```{r}
+simulated_data <- function() {
+  tibble(
+    x = rnorm(50),
+    sex = rep(c("male", "female"), times = 25),
+  
+  )
+}
+```
+
 
 
 ```{r}
@@ -136,10 +154,10 @@ select_gapminder(pop, year)
 
 ```{r}
 filter_summarise <- function(...) {
-
-  
-  
-  
+  gapminder %>% 
+    filter(...) %>% 
+    summarise(mean = mean(lifeExp),
+              n = n())
 }
 
 
