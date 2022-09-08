@@ -43,6 +43,7 @@ library(broom)
 library(tidyquant)
 library(infer)
 library(openintro)
+library(knitr)
 ```
 
 
@@ -241,21 +242,41 @@ Calculate summary statistics on salary by gender. Also, create and print a dataf
 
 ```{r, confint_single_valiables}
 # Summary Statistics of salary by gender
-mosaic::favstats (salary ~ gender, data=omega)
+kable(favstats (salary ~ gender, data=omega))
 
 # Dataframe with two rows (male-female) and having as columns gender, mean, SD, sample size, 
 # the t-critical value, the standard error, the margin of error, 
 # and the low/high endpoints of a 95% condifence interval
 
+ci_omega <- omega %>% 
+  group_by(gender) %>% 
+  summarize(mean = mean(salary, na.rm=TRUE),
+            sd = sd(salary, na.rm=TRUE),
+            count = n(),
+            t_critical = qt(0.975, count-1),
+            se_diff = sd/sqrt(count),
+            margin_of_error = t_critical * se_diff,
+            salary_low = mean - margin_of_error,
+            salary_high = mean + margin_of_error)
+
+# print the table with confidence interval
+
+kable(ci_omega)
 
 ```
 
 > What can you conclude from your analysis? A couple of sentences would be enough
 
+**Answer:**\
+The two confidence interval for women and men of a 95% do not overlap. The difference between the two groups is thus significantly different. 
+
+
 You can also run a hypothesis testing, assuming as a null hypothesis that the mean difference in salaries is zero, or that, on average, men and women make the same amount of money. You should tun your hypothesis testing using `t.test()` and with the simulation method from the `infer` package.
 
 ```{r, hypothesis_testing}
 # hypothesis testing using t.test() 
+
+t.test(salary ~ gender, data = omega)
 
 
 # hypothesis testing using infer package
@@ -264,6 +285,8 @@ You can also run a hypothesis testing, assuming as a null hypothesis that the me
 ```
 
 > What can you conclude from your analysis? A couple of sentences would be enough
+
+**Answer**:
 
 
 ## Relationship Experience - Gender?
