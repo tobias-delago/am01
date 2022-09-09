@@ -71,6 +71,8 @@ weather <-
 ## Select the year and the twelve month variables from the `weather` dataset and convert the dataframe from wide to 'long' format. 
 
 ```{r tidyweather}
+
+#Converting into long format, first column (year) stays
 weather_selected <- weather %>% 
   select(1:13)
 
@@ -87,13 +89,12 @@ tidyweather
 
 ```{r scatter_plot}
 
+# Transforming the date
 tidyweather <- tidyweather %>%
   mutate(date = ymd(paste(as.character(Year), month, "1")),
          month = month(date, label=TRUE))
-         #Year = year(date))
 
-tidyweather
-
+# Creating scatterplot
 ggplot(tidyweather, aes(x=date, y = delta))+
   geom_point(alpha = 0.4)+
   geom_smooth(color="red", se = FALSE) +
@@ -107,10 +108,14 @@ ggplot(tidyweather, aes(x=date, y = delta))+
 
 ```
 
+
+
+
 ## Is the effect of increasing temperature more pronounced in some months?  
 
 ```{r facet_wrap, echo=FALSE}
 
+# Facetting plot by month
 ggplot(tidyweather, aes(x=date, y = delta))+
   geom_point(alpha = 0.4)+
   geom_smooth(color="red", se = FALSE) +
@@ -123,11 +128,11 @@ ggplot(tidyweather, aes(x=date, y = delta))+
     caption = "Source: National Aeronautics and Space Administration - Goddard Institute (2022)"
   )
 
-
 ```
+
 **Answer:**\
 
-It looks like the colder months (Oct to April) have increased more significantly (steeper slope) than the summer months. This can also be confirmed by a report from the US Environmental Protection Agency which highlights that overall, minimum temperatures have increased at a higher rate than average maximum temperatures.
+It looks like the colder months (Oct to April) have increased more significantly (steeper slope) than the summer months. This can also be confirmed by a report from the US Environmental Protection Agency which highlights that overally, minimum temperatures have increased at a higher rate than average maximum temperatures.
 
 
 
@@ -135,6 +140,7 @@ We remove data before 1800 and before using `filter`. Then, we use the `mutate` 
 
 ```{r intervals, eval=FALSE}
 
+# Code provided, creating new column for intervals with case_when function
 comparison <- tidyweather %>% 
   filter(Year>= 1881) %>%     #remove years prior to 1881
   #create new variable 'interval', and assign values based on criteria below:
@@ -154,6 +160,7 @@ comparison <- tidyweather %>%
 
 ```{r density_plot, eval=FALSE}
 
+# Different density courves in same figure
 ggplot(comparison, aes(x = delta, fill = interval)) +
   geom_density(alpha = 0.5)+
   labs (
@@ -165,6 +172,7 @@ ggplot(comparison, aes(x = delta, fill = interval)) +
   theme_bw()
 
 ```
+
 
 ## Create a scatter plot for average annual anomalies. 
 
@@ -197,8 +205,9 @@ ggplot(average_annual_anomaly, aes(x = Year, y = meanDelta)) +
 
 ## Confidence Interval for `delta`
 
-```{r, calculate_CI_using_formula}
+```{r calculate_CI_using_formula}
 
+# Using formula approach for CI
 formula_ci <- comparison %>% 
   
   # choose the interval 2011-present
@@ -216,13 +225,15 @@ formula_ci <- comparison %>%
             delta_low = mean - margin_of_error,
             delta_high = mean + margin_of_error)
 #print out CI
-kable(formula_ci)
+kable(formula_ci,
+      caption = "CI by Formula")
 
 ```
 
-```{r}
-# bootstrap simulation from here
 
+```{r bootstrap}
+
+# Using bootstrap (infer package) approach for CI
 set.seed(1234)
 
 boot_delta <- comparison %>% 
@@ -235,7 +246,8 @@ bootstrap_ci <- boot_delta %>%
   get_confidence_interval(level =0.95, type = "percentile")
 
 #print out CI
-kable(bootstrap_ci)
+kable(bootstrap_ci,
+      caption = "CI by Bootstrapping")
 ```
 
 
@@ -255,7 +267,7 @@ approval_polllist <- read_csv('https://projects.fivethirtyeight.com/biden-approv
 
 ## Lubridate the chr dates
 
-```{r}
+```{r lubridate}
 # Use `lubridate` to fix dates, as they are given as characters.
 
 approval_date <- approval_polllist %>% 
@@ -268,18 +280,21 @@ approval_date <- approval_polllist %>%
 
 Your plot should look something like this:
 
-```{r trump_margins, echo=FALSE, out.width="100%"}
+```{r biden_margins, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "biden_approval_margin.png"), error = FALSE)
 ```
 
 
-```{r, fig.height=4}
+```{r biden, fig.height=4}
+
+# Filtering data for year and interested columns
 poll_filtered <- approval_date %>% 
   select(c("enddate","subgroup","approve","disapprove")) %>% 
   filter(enddate >= "2022-01-01") %>% 
   mutate(week = week(enddate),
          dif = approve-disapprove)
 
+# Calculating ci for each subgroup and week
 ci_biden_facet <- poll_filtered %>% 
   group_by(week, subgroup) %>% 
   summarize(mean = mean(dif, na.rm=TRUE),
@@ -291,6 +306,7 @@ ci_biden_facet <- poll_filtered %>%
             diff_low = mean - margin_of_error,
             diff_high = mean + margin_of_error)
 
+# Plotting line chart with ribbon function for CI
 ggplot(ci_biden_facet, aes(x = week, y = mean, color = subgroup)) +
   geom_line() +
   geom_ribbon(aes(x=week, y=mean, ymax=diff_high, ymin=diff_low, color = subgroup), linetype=1, size = 0.9, fill = "brown", alpha=0.1)+
@@ -304,7 +320,6 @@ ggplot(ci_biden_facet, aes(x = week, y = mean, color = subgroup)) +
   ) +
   theme_bw() +
   theme(legend.position="none")
-
 
 ```
 
@@ -369,24 +384,8 @@ In creating your plots, you may find these links useful:
 -   <https://ggplot2.tidyverse.org/reference/geom_tile.html>
 -   <https://ggplot2.tidyverse.org/reference/geom_rug.html>
 
+
 # Challenge 2: Share of renewable energy production in the world
-
-The National Bureau of Economic Research (NBER) has a a very interesting
-dataset on the adoption of about 200 technologies in more than 150
-countries since 1800. This is the[Cross-country Historical Adoption of
-Technology (CHAT) dataset](https://www.nber.org/research/data/cross-country-historical-adoption-technology).
-
-The following is a description of the variables
-
-| **variable** | **class** | **description**                |
-|--------------|-----------|--------------------------------|
-| variable     | character | Variable name                  |
-| label        | character | Label for variable             |
-| iso3c        | character | Country code                   |
-| year         | double    | Year                           |
-| group        | character | Group (consumption/production) |
-| category     | character | Category                       |
-| value        | double    | Value (related to label)       |
 
 ```{r,load_technology_data}
 
@@ -429,61 +428,86 @@ countries <-  wb_cachelist$countries %>%
 
 ```
 
-This is a very rich data set, not just for energy and CO2 data, but for many other technologies. In our case, we just need to produce a couple of graphs-- at this stage, the emphasis is on data manipulation, rather than making the graphs gorgeous.
 
-First, produce a graph with the countries with the highest and lowest % contribution of renewables in energy production. This is made up of `elec_hydro`, `elec_solar`, `elec_wind`, and `elec_renew_other`. You may want to use the *patchwork* package to assemble the two charts next to each other.
+## First, produce a graph with the countries with the highest and lowest % contribution of renewables in energy production. 
  
-```{r min-max_renewables, echo=FALSE, out.width="100%"}
+```{r min-max_renewables, echo=FALSE, out.width="100%", fig.height=4}
 knitr::include_graphics(here::here("images", "renewables.png"), error = FALSE)
+
+
+#Energy Dataset has been converted to wide format and we have calculated % of renewable energy and rounded it 3 decimal places
+energy_renew <- energy %>% 
+  filter(year==2019)  %>% 
+  select(c(variable,value,country)) %>%
+  pivot_wider(names_from = variable, values_from = value) %>% 
+  mutate(perc_hydro=round(elec_hydro/elecprod, 3),
+         perc_solar=round(elec_solar/elecprod, 3),
+         perc_wind=round(elec_wind/elecprod, 3),
+         perc_renew_other=round(elec_renew_other/elecprod, 3),
+         perc_renew=round(perc_hydro+perc_solar+perc_wind+perc_renew_other,3)) %>% 
+  mutate(country=fct_reorder(country,perc_renew))
+
+#Filtered data set for non-negative percentage and chose the bottom 20 countries followed by the graph formatting
+energy_min_20 <- energy_renew %>% 
+  filter(perc_renew>0) %>% 
+  group_by(country) %>% 
+  summarise(perc_renew=sum(perc_renew)) %>% 
+  slice_min(perc_renew,n=20) %>% 
+  mutate(country=fct_reorder(country,perc_renew)) %>% 
+  ggplot(aes(perc_renew,country))+
+  geom_col()+
+  scale_x_continuous(labels=scales::percent)+
+  labs(x=NULL,y=NULL)+
+  theme_minimal()
+
+#Filtered data set for non-negative percentage and chose the top 20 countries followed by the graph formatting  
+energy_max_20 <- energy_renew %>% 
+  filter(perc_renew>0) %>% 
+  group_by(country) %>% 
+  summarise(perc_renew=sum(perc_renew)) %>% 
+  slice_max(perc_renew,n=20) %>% 
+  mutate(country=fct_reorder(country,perc_renew)) %>% 
+  ggplot(aes(perc_renew,country))+
+  geom_col()+
+  scale_x_continuous(labels=scales::percent)+
+  labs(x=NULL,y=NULL)+
+  theme_minimal()
+
+#Graphs are combined and labelled
+energy_max_20 + energy_min_20 +
+  plot_annotation(title = "Highest and lowest % of renewables in energy production",
+                  subtitle = "2019 Data",
+                  caption = "Source: NBER CHAT Database")
 ```
-```{r}
-
-energy_filtered <-  energy %>% 
-  filter(year == "2019", country != "Antarctica", country != "Western Sahara") %>% 
-  group_by(country,variable) %>% 
-    summarise(value=sum(value, na.rm=TRUE)) %>% 
-    pivot_wider(names_from = variable, 
-                values_from = value) %>%   
-    mutate(perc_hydro=round(elec_hydro/elecprod, 3),
-          perc_solar=round(elec_solar/elecprod, 3),
-          perc_wind=round(elec_wind/elecprod, 3),
-          perc_renew_other=round(elec_renew_other/elecprod, 3),
-          perc_renew_total=(perc_hydro+perc_solar+perc_wind+perc_renew_other)) 
-
-
-energy_new <- energy_filtered %>% 
-  filter(perc_renew_total != 0) %>% 
-  slice_min(perc_renew_total, n=20)
-
-
-```
 
 
 
 
-Second, you can produce an animation to explore the relationship between CO2 per capita emissions and the deployment of renewables. As the % of energy generated by renewables goes up, do CO2 per capita emissions seem to go down?
-
+## Second, you can produce an animation to explore the relationship between CO2 per capita emissions and the deployment of renewables. As the % of energy generated by renewables goes up, do CO2 per capita emissions seem to go down?
  
 ```{r animation, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "animation.gif"), error = FALSE)
 
+#Create a pivot wider format and add new column
 energy_perc <- energy %>% 
   select(year, variable,value,country) %>% 
   pivot_wider(names_from = variable, values_from = value) %>% 
   mutate(percent_renew = (elec_hydro+elec_solar+elec_wind+elec_renew_other)/elecprod *100) 
 
+# Select only interested columns in energy chart
 energy_perc_filtered <- energy_perc %>% 
   select(year, country, percent_renew)
   
+# Select only interested columns in co2 chart
 co2_percap_filtered <- co2_percap %>% 
   select(country, date, value, iso3c) %>% 
   rename(year = date)
 
+# Join the tables (energy, co2, and income_level)
 energy_combined1 <- left_join(energy_perc_filtered, co2_percap_filtered, by = c("country", "year"))
-
 energy_combined2 <- left_join(energy_combined1, countries, by = c("iso3c"))
 
-
+# Create visualization (packages required)
 energy_combined2 %>% 
   mutate(year = as.integer(year)) %>% 
   filter(year>=1990, !is.na(income_level)) %>% 
@@ -497,25 +521,16 @@ energy_combined2 %>%
        y = 'CO2 per cap') +
   transition_time(year) +
   ease_aes('linear')
-    
-#correlate(energy_combined2$percent_renew,energy_combined2$value)
+
+#Find out correlation    
+correlate(energy_combined2$percent_renew,energy_combined2$value)
 
 ```
 
 **Answer:**\
 
-Since the correlation value for Co2 emission and usage renawable energy is negative, we can say that as usage of renawable energy goes up, we can reduce CO2 emission by upto 31%.\
+Since the correlation value for Co2 emission and usage renawable energy is negative, we can say that as usage of renawable energy goes up, we can reduce CO2 emission by up to 31%. This finding would correspont to the common understanding on how renewable energy could be a vital factor in slowing down climate change.\
 
-
-To create this animation is actually straight-forward. You manipulate your date, and the create the graph in the normal ggplot way. the only `gganimate` layers you need to add to your graphs are
-
-```
-  labs(title = 'Year: {frame_time}', 
-       x = '% renewables', 
-       y = 'CO2 per cap') +
-  transition_time(year) +
-  ease_aes('linear')
-```
 
 
 # Deliverables
@@ -528,10 +543,9 @@ editor window) and upload it to Canvas.
 
 # Details
 
--   Who did you collaborate with: TYPE NAMES HERE
--   Approximately how much time did you spend on this problem set:
-    ANSWER HERE
--   What, if anything, gave you the most trouble: ANSWER HERE
+-   Who did you collaborate with: *Vani Duggal, Mehak Khanna, Manon Pillot, Nick Chen, Liyang Zhang, Tobias Delago*
+-   Approximately how much time did you spend on this problem set: *20h*
+-   What, if anything, gave you the most trouble: *eliminating conceptual errors*
 
 **Please seek out help when you need it,** and remember the [15-minute
 rule](https://mam202.netlify.app/syllabus/#the-15-minute-rule){target="_blank"}.
