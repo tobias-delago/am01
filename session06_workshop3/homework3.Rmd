@@ -430,7 +430,7 @@ ggplot(tidyresults, aes(x= percentage, y = leave_share, colour = party)) +
     x = "Party % in the UK 2015 general election"
   )+
   theme_bw()+
-  ylim(20, 100)+
+  ylim(20, 102)+
   theme(legend.position="bottom",
         legend.title = element_blank())+
   scale_color_manual(values=colors_brexit,
