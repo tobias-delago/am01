@@ -541,7 +541,7 @@ energy_max_20 <- energy_renew %>%
   scale_x_continuous(labels=scales::percent)+
   labs(x=NULL,y=NULL)+
   theme_minimal()+
-  theme(text = element_text(size = 8))
+  theme(text = element_text(size = 7))
 
 #Graphs are combined and labelled
 energy_max_20 + energy_min_20 +
@@ -619,7 +619,7 @@ editor window) and upload it to Canvas.
 
 -   Who did you collaborate with: *Vani Duggal, Mehak Khanna, Manon Pillot, Nick Chen, Liyang Zhang, Tobias Delago*
 -   Approximately how much time did you spend on this problem set: *20h*
--   What, if anything, gave you the most trouble: *eliminating conceptual errors*
+-   What, if anything, gave you the most trouble: *eliminating conceptual errors, getting the exact same order in challenge 2 due to rounding issues*
 
 **Please seek out help when you need it,** and remember the [15-minute
 rule](https://mam202.netlify.app/syllabus/#the-15-minute-rule){target="_blank"}.
