@@ -397,15 +397,20 @@ brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoul
 
 ```{r, out.width="100%", fig.height=4.5}
 
+# Concatenated colors in new variable
+
 parties_brexit_names <- c("Conservative", "Labour", "Lib Dems", "UKIP")
 colors_brexit <- c("#0087dc", "#d50000","#FDBB30","#EFE600")
 
+# Tidy long format
 
 tidyresults <- brexit_results %>% 
   select(1:6) %>% 
   pivot_longer(cols = 2:5,
                names_to = "party",
                values_to = "percentage") 
+
+# Create scatterplot with regression lines
 
 ggplot(tidyresults, aes(x= percentage, y = leave_share, colour = party)) +
   geom_point(alpha = 0.4)+
