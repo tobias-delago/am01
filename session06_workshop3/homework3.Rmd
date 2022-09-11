@@ -213,13 +213,10 @@ Your R code and analysis should go here. If you want to insert a blank chunk of 
 
 # Omega Group plc- Pay Discrimination
 
-
-At the last board meeting of Omega Group Plc., the headquarters of a large multinational company, the issue was raised that women were being discriminated in the company, in the sense that the salaries were not the same for male and female executives. A quick analysis of a sample of 50 employees (of which 24 men and 26 women) revealed that the average salary for men was about 8,700 higher than for women. This seemed like a considerable difference, so it was decided that a further analysis of the company salaries was warranted. 
-
 You are asked to carry out the analysis. The objective is to find out whether there is indeed a significant difference between the salaries of men and women, and whether the difference is due to discrimination or whether it is based on another, possibly valid, determining factor. 
 
-## Loading the data
 
+Loading the data:
 
 ```{r load_omega_data}
 omega <- read_csv(here::here("data", "omega.csv"))
@@ -227,18 +224,6 @@ glimpse(omega) # examine the data frame
 ```
 
 ## Relationship Salary - Gender ?
-
-The data frame `omega`  contains the salaries for the sample of 50 executives in the company. Can you conclude that there is a significant difference between the salaries of the male and female executives?
-
-Note that you can perform different types of analyses, and check whether they all lead to the same conclusion 
-
-.	Confidence intervals
-.	Hypothesis testing
-.	Correlation analysis
-.	Regression
-
-
-Calculate summary statistics on salary by gender. Also, create and print a dataframe where, for each gender, you show the mean, SD, sample size, the t-critical, the SE, the margin of error, and the low/high endpoints of a 95% condifence interval
 
 ```{r confint_single_valiables}
 # Summary Statistics of salary by gender
@@ -269,10 +254,10 @@ kable(ci_omega,
 What can you conclude from your analysis? A couple of sentences would be enough
 
 **Answer:**\
-The two confidence interval for women and men salary of a 95% do not overlap. The difference between the two groups is thus significantly different. The t-test would thus not be needed in this case. 
+The two confidence interval for women and men salary of a 95% do not overlap. The difference in salary between the two groups is thus significantly different. The t-test would thus not be needed in this case. 
 
 
-You can also run a hypothesis testing, assuming as a null hypothesis that the mean difference in salaries is zero, or that, on average, men and women make the same amount of money. You should tun your hypothesis testing using `t.test()` and with the simulation method from the `infer` package.
+## Relationship Salary - Gender Hypothesis Test (t.test + infer)
 
 ```{r hypothesis_testing}
 # hypothesis testing using t.test() 
@@ -324,7 +309,6 @@ With 1000 reps the bootstrap simulation gave a p-value of zero, this can be the 
 
 ## Relationship Experience - Gender?
 
-At the board meeting, someone raised the issue that there was indeed a substantial difference between male and female salaries, but that this was attributable to other reasons such as differences in experience. A questionnaire send out to the 50 executives in the sample reveals that the average experience of the men is approximately 21 years, whereas the women only have about 7 years experience on average (see table below).
 
 ```{r, experience_stats}
 # Summary Statistics of salary by gender
@@ -332,7 +316,7 @@ favstats (experience ~ gender, data=omega)
 
 ```
 
-Based on this evidence, can you conclude that there is a significant difference between the experience of the male and female executives? Perform similar analyses as in the previous section. Does your conclusion validate or endanger your conclusion about the difference in male and female salaries?  
+Based on this evidence, can you conclude that there is a significant difference between the experience of the male and female executives? Does your conclusion validate or endanger your conclusion about the difference in male and female salaries?  
 
 ```{r ci_experience}
 
@@ -358,7 +342,7 @@ kable(ci_omega_experience,
 
 **Answer:**\
 
-The two experience confidence intervals for women and men at 95% do not overlap. The difference between the two groups is thus significantly different and there is no need to run a t-test. It would endager the conclusion drawn above (gender-based salary discrimination) as it seems that not only gender, but an additional previously not considered factor, experience, could influence the pay-gap . 
+The two experience confidence intervals for women and men at 95% do not overlap. The difference between the two groups is thus significantly different and there is no need to run a t-test. These findings would endager the conclusion drawn above (gender-based salary discrimination) as it seems that not only gender, but an additional previously not considered factor, experience, could influence the pay-gap. Further anaylsis is suggested.
 
 
 ## Relationship Salary - Experience ?
@@ -381,8 +365,8 @@ ggplot(omega, aes(x = experience, y = salary, color = gender)) +
 ```
 
 
-## Check correlations between the data
-You can use `GGally:ggpairs()` to create a scatterplot and correlation matrix. Essentially, we change the order our variables will appear in and have the dependent variable (Y), salary, as last in our list. We then pipe the dataframe to `ggpairs()` with `aes` arguments to colour by `gender` and make the plots somewhat transparent (`alpha  = 0.3`).
+## Check correlations between Gender, Experience and Salary
+
 
 ```{r, ggpairs}
 omega %>% 
@@ -395,12 +379,14 @@ Look at the salary vs experience scatterplot. What can you infer from this plot?
 
 **Answer:**\
 
-The correlation matrix reweals many interesting things in just one visualization. Looking at the scatterplot we can see a clear correlation between years of experience and salary, this is true for both genders. The correlation can also be confirmed mathematically with a total cor of 0.8. In other words, the higher the experience the higher the salary. WE have facetted the plot above to demonstrate that women salary increase more significantly with growing experience (stepper slope). With women having a median experience of 3 and men of 19.5 it is thus not surprising that there is a significant pay-gap. Omega should rather investigate the underlying reason why women have so little work experience. Are senior positions which require more experience mainly filled by man while graduate positions mainly by women? Anyhow, further investigation is needed!
+The correlation matrix reweals many interesting things in just one visualization. Looking at the scatterplot we can see a clear correlation between years of experience and salary, this is true for both genders. The correlation can also be confirmed mathematically with a total cor of 0.8. In other words, the higher the experience the higher the salary. We have used two colors in the plot above to demonstrate that women salary increase more significantly with growing experience (stepper slope). With women having a median experience of 3 and men of 19.5 it is thus not surprising that there is a significant pay-gap. Omega should rather investigate the underlying reason why women have so little work experience. Are senior positions which require more experience mainly filled by man while graduate positions mainly by women? Anyhow, further investigation is needed!
+
 
 # Challenge 1: Brexit plot
 
-Using your data manipulation and visualisation skills, please use the Brexit results dataframe (the same dataset you used in the pre-programme assignement) and produce the following plot. Use the correct colour for each party; google "UK Political Party Web Colours" and find the appropriate hex code for colours, not the default colours that R gives you.
+## Reproduce the Graph using the same colors
 
+The final graph should look like this:
 
 ```{r brexit_challenge, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "brexit.png"), error = FALSE)
@@ -409,7 +395,7 @@ knitr::include_graphics(here::here("images", "brexit.png"), error = FALSE)
 brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoulou/am01/master/data/brexit_results.csv")
 ```
 
-```{r, fig.height=4.5}
+```{r, out.width="100%", fig.height=4.5}
 
 parties_brexit_names <- c("Conservative", "Labour", "Lib Dems", "UKIP")
 colors_brexit <- c("#0087dc", "#d50000","#FDBB30","#EFE600")
@@ -459,40 +445,116 @@ UN_GDP_data  <-  read_excel(here::here("data", "Download-GDPconstant-USD-countri
 
 > make sure you remove `eval=FALSE` from the next chunk of R code-- I have it there so I could knit the document
 
-```{r reshape_GDP_data, eval=FALSE}
+```{r reshape_GDP_data}
 
-tidy_GDP_data  <-  ?????????????????????????
+tidy_GDP_data  <- UN_GDP_data %>% 
+                      pivot_longer(cols = 4:51, names_to = "Year") %>% 
+                      mutate(value=value/(1e9))
+
+# Renaming indicators
+
+tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="Exports of goods and services"] <- "Exports"
+tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="Imports of goods and services"] <- "Imports"
+tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="General government final consumption expenditure"] <- "Government expenditure"
+tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="Household consumption expenditure (including Non-profit institutions serving households)"] <- "Household expenditure"
+
+
+
 
 glimpse(tidy_GDP_data)
 
 
 # Let us compare GDP components for these 3 countries
 country_list <- c("United States","India", "Germany")
+indicator_list <- c("Exports","Imports","Government expenditure","Household expenditure","Gross capital formation","Net Exports")
+
 ```
 
-First, can you produce this plot?
+## Can you produce this plots?
 
-
+The first should look like this:
 ```{r gdp1, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "gdp1.png"), error = FALSE)
 ```
+```{r gdp1_self, out.width="100%", fig.height=3.5}
 
+#Creating line chart and setting colors due to different order
 
-Secondly, recall that GDP is the sum of Household Expenditure (Consumption *C*), Gross Capital Formation (business investment *I*), Government Expenditure (G) and Net Exports (exports - imports). Even though there is an indicator `Gross Domestic Product (GDP)` in your dataframe, I would like you to calculate it given its components discussed above.
+tidy_GDP_data %>% 
+    mutate(Year=as.integer(Year)) %>% 
+    filter(Country %in% country_list, IndicatorName %in% indicator_list) %>% 
+    ggplot(aes(Year,value,color=IndicatorName))+
+    geom_line(size=0.8)+
+    xlim(1970,2017)+
+    facet_wrap(~Country)+
+    labs(title = "GDP components over time",
+       subtitle = "In Constant 2010 USD",
+       x=NULL,
+       y="Billion US$",
+       color= "Components of GDP")+
+    #scale_color_discrete(name = "Components of GDP")+
+   # theme(legend.title = "Components of GDP")+
+    scale_color_manual(values = c("#A3A500",
+                                  "#00BF7D",
+                                  "#F8766D",
+                                  "#2FBEF7",
+                                  "#EA7DF4"))+
+  theme_bw()
 
-> What is the % difference between what you calculated as GDP and the GDP figure included in the dataframe?
+```
 
-
+The second should look like this:
 ```{r gdp2, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "gdp2.png"), error = FALSE)
 ```
 
+```{r gdp2_self, out.width="100%", fig.height=3.5}
+
+# Going back to wider to easily calculate columns
+
+tidy_GDP_data %>% 
+    mutate(Year=as.integer(Year)) %>% 
+    filter(Country %in% country_list, IndicatorName %in% indicator_list) %>% 
+    select(Country,IndicatorName,Year,value) %>% 
+    pivot_wider(names_from = IndicatorName,values_from = value) %>% 
+    clean_names() %>%   
+    mutate(net_export=(exports-imports),
+           GDP=(household_expenditure+ government_expenditure+gross_capital_formation+net_export),
+           "Household expenditure"=household_expenditure/GDP,
+           "Government expenditure"=government_expenditure/GDP,
+           "Gross capital formation"=gross_capital_formation/GDP,
+           "Net Exports"=net_export/GDP)%>% 
+    pivot_longer(cols=3:13,names_to = "IndicatorName") %>% 
+    filter(IndicatorName %in% indicator_list) %>% 
+    ggplot(aes(year,value,color=IndicatorName,group=IndicatorName))+
+    geom_line(size=0.8)+
+    xlim(1970,2017)+
+    facet_wrap(~country)+
+    labs(title = "GDP and its breakdown at constant 2010 prices in US Dollars",
+       x=NULL,
+       y="proportion",
+       caption = "Source: United Nations, https://unstats.un.org/unsd/snaama/Downloads")+
+     scale_color_discrete(name = NULL)+
+    theme_bw() +
+    scale_y_continuous(labels = scales::percent)
 
 
-> What is this last chart telling you? Can you explain in a couple of paragraphs the different dynamic among these three countries? 
+```
+## What is this last chart telling you? Can you explain in a couple of paragraphs the different dynamic among these three countries? 
 
 
-> If you want to, please change `country_list <- c("United States","India", "Germany")` to include your own country and compare it with any two other countries you like
+
+
+
+Secondly, recall that GDP is the sum of Household Expenditure (Consumption *C*), Gross Capital Formation (business investment *I*), Government Expenditure (G) and Net Exports (exports - imports). Even though there is an indicator `Gross Domestic Product (GDP)` in your dataframe, I would like you to calculate it given its components discussed above.
+
+## What is the % difference between what you calculated as GDP and the GDP figure included in the dataframe?
+
+
+
+
+
+
 
 
 # Deliverables
@@ -501,9 +563,9 @@ There is a lot of explanatory text, comments, etc. You do not need these, so del
 
 # Details
 
-- Who did you collaborate with: TYPE NAMES HERE
-- Approximately how much time did you spend on this problem set: ANSWER HERE
-- What, if anything, gave you the most trouble: ANSWER HERE
+- Who did you collaborate with: *Vani Duggal, Mehak Khanna, Manon Pillot, Nick Chen, Liyang Zhang, Tobias Delago*
+- Approximately how much time did you spend on this problem set: *15h*
+- What, if anything, gave you the most trouble: *Understanding the hypothesis workflow when doing it the first time*
 
 
 **Please seek out help when you need it,** and remember the [15-minute rule](https://mam2022.netlify.app/syllabus/#the-15-minute-rule){target=_blank}. You know enough R (and have enough examples of code from class and your readings) to be able to do this. If you get stuck, ask for help from others, post a question on Slack-- and remember that I am here to help too!  
