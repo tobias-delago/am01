@@ -44,6 +44,8 @@ library(tidyquant)
 library(infer)
 library(openintro)
 library(knitr)
+library(scales)                         
+library(data.table)  
 ```
 
 
@@ -70,7 +72,30 @@ You will first start with analyzing the `weight` of participants in kilograms. U
 
 ```{r, eda_on_weight}
 
+skimr::skim(yrbss)
+
+x <- yrbss$weight 
+h<-hist(x,  
+        xlab="weight", main="Histogram with Normal Curve") 
+
+
+xfit<-seq(min(x,na.rm = TRUE),max(x,na.rm = TRUE),length=40)               #  order the data 
+yfit<-dnorm(xfit,mean=mean(x,na.rm = TRUE),sd=sd(x,na.rm = TRUE))          #  density of normal dis
+yfit <- yfit*diff(h$mids[1:2])*length(x) 
+lines(xfit, yfit, col="red", lwd=2) 
+
+
+kable(yrbss%>%
+  filter(is.na(weight))%>%
+  summarise(Toatal_missing_data=n()),"simple")
+
+summary(yrbss$weight)
+
 ```
+**Answer:**\
+
+The minimum value of weight is 30, the maximum value is 181, the median is 64, the 1/4 quantile is 56, the 3/4 quantile is 76, and the total number of missing values is 1004.
+
 
 Next, consider the possible relationship between a high schooler’s weight and their physical activity. Plotting the data is a useful first step because it helps us quickly visualize trends, identify strong associations, and develop research questions.
 
@@ -79,17 +104,101 @@ Let’s create a new variable in the dataframe `yrbss`, called `physical_3plus` 
   
 ```{r, mutate_and_count}
 
+yrbss$physical_3plus<-ifelse(yrbss$physically_active_7d>=3,"yes","no")
 
+
+#group_by()... summarise()
+yrbss%>%
+ #filter(is.na(physical_3plus)==FALSE)%>%
+  #filter(physical_3plus=='no')%>%
+  group_by(physical_3plus)%>%
+  summarise(n=n())%>%
+  mutate(prop=label_percent()(n/nrow(yrbss)))
+
+#count()
+yrbss%>%
+count(physical_3plus)
+
+yrbss%>%
+  filter(is.na(physical_3plus)==FALSE)%>%
+  group_by(physical_3plus)%>%
+  summarise(number=n())%>%
+ggplot(aes(x=physical_3plus,y=number))+
+  geom_bar(stat = "identity",width =0.5)+
+  labs(x="physical_3plus",y="number")+
+  ggtitle("The bar graph of the number of physical_3plus",
+          subtitle = "")+
+  theme_bw()
 
 ```
 Can you provide a 95% confidence interval for the population proportion of high schools that are *NOT* active 3 or more days per week?
+
+```{r, confidence_interval}
+
+#Filtering data
+
+test<-yrbss %>% 
+  filter(is.na(physical_3plus)==FALSE)%>%
+  mutate(physical_3_p=ifelse(physical_3plus=="yes",1,0), physical_3_l=ifelse(physical_3plus=="no",1,0))
+
+# Confidence Interval with bootstrap  
+set.seed(1234)
+boot_3lower <- test %>% 
+# Select
+  filter(is.na(physical_3plus)==FALSE)%>%                  
+# Specify the variable of interest
+  specify(response = physical_3_l) %>%
+# Generate a bunch of bootstrap samples
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "mean") 
+
+percentile_ci<- boot_3lower %>% 
+   get_confidence_interval(level=0.95, type="percentile")
+percentile_ci
+
+# With formula
+
+ci_yrbss <- test %>% 
+  filter(!is.na(physical_3plus)) %>%
+  summarize(count = n(),
+            p = (sum(physical_3plus == "no"))/count,
+            t_critical = qt(0.975, count-1),
+            se_diff = sqrt(p*(1-p)/count),
+            margin_of_error = t_critical * se_diff,
+            prop_low = p - margin_of_error,
+            prop_high = p + margin_of_error)
+
+# print the table with confidence interval
+
+kable(ci_yrbss,
+      caption="CI 3 or more times active")
+
+```
+
+
+**Answer:**\
+
+95% confidence interval is [0.323,0.338]
 
   
 Make a boxplot of `physical_3plus` vs. `weight`. Is there a relationship between these two variables? What did you expect and why?
 
 ```{r, boxplot}
 
+yrbss%>%
+  filter(is.na(physical_3plus)==FALSE)%>%
+ggplot(aes(x=physical_3plus,y=weight))+
+  geom_boxplot()+
+  ggtitle("The boxplot of the weight of physical_3plus",
+          subtitle = "")+
+  theme_bw()
+
 ```
+
+**Answer:**\
+
+There is a positive relationship between being physically active for at least 3 days a week and weight. The result is somehow counter-intuitive, but might be explained by the reason that people who stay highly active physically have more muscles.
+
 
 ## Confidence Interval
 
@@ -97,6 +206,21 @@ Boxplots show how the medians of the two distributions compare, but we can also 
 
 
 ```{r, ci_using_formulas}
+
+#Apllying formula to weight
+ci_yrbss_weight <- yrbss %>% 
+  filter(is.na(physical_3plus)==FALSE)%>%
+  group_by(physical_3plus) %>% 
+  summarize(mean = mean(weight, na.rm=TRUE),
+            sd = sd(weight, na.rm=TRUE),
+            count = n(),
+            t_critical = qt(0.975, count-1),
+            se_diff = sd/sqrt(count),
+            margin_of_error = t_critical * se_diff,
+            weight_low = mean - margin_of_error,
+            weight_high = mean + margin_of_error)
+
+kable(ci_yrbss_weight)
 
 ```
 
@@ -109,6 +233,7 @@ Write the null and alternative hypotheses for testing whether mean weights are d
 ```{r, t_test_using_R}
 
 t.test(weight ~ physical_3plus, data = yrbss)
+
 ```
 
 
@@ -121,7 +246,11 @@ Next, we will introduce a new function, `hypothesize`, that falls into the infer
 But first, we need to initialize the test, which we will save as `obs_diff`.
 
 ```{r, calc_obs_difference}
-obs_diff <- yrbss %>%
+
+yrbss_filtered<-yrbss%>%
+  filter(is.na(physical_3plus)==FALSE,is.na(weight)==FALSE)
+
+obs_diff <- yrbss_filtered %>%
   specify(weight ~ physical_3plus) %>%
   calculate(stat = "diff in means", order = c("yes", "no"))
 
@@ -136,7 +265,7 @@ After you have initialized the test, you need to simulate the test on the null d
 
 ```{r, hypothesis_testing_using_infer_package}
 
-null_dist <- yrbss %>%
+null_dist <- yrbss_filtered %>%
   # specify variables
   specify(weight ~ physical_3plus) %>%
   
@@ -206,7 +335,109 @@ glimpse(movies)
 
 Your R code and analysis should go here. If you want to insert a blank chunk of R code you can just hit `Ctrl/Cmd+Alt+I` 
 
+null hypotheses:the mean IMDB rating for Steven Spielberg and Tim Burton are the same .
+alternative hypotheses:the mean IMDB rating for Steven Spielberg and Tim Burton are not the same .
+
+
+```{r, fig.height=4}
+
+
+movies<-movies%>%
+  filter(director %in% c("Steven Spielberg", "Tim Burton"))
+
+#director=="Steven Spielberg",mean=7.57 ,the 95% confidence interval is [7.27,7.87]
+a<-movies%>%
+  filter(director=="Steven Spielberg")
+t.test(a$rating)
+
+#director=="Tim Burton",mean=6.93 ,the 95% confidence interval is [6.53,7.33]
+b<-movies%>%
+  filter(director=="Tim Burton")
+t.test(b$rating)
+
+
+df <- tibble(
+  director = c("Steven Spielberg","Tim Burton"),
+  mean = c(7.57, 6.93),
+  lower = c( 7.27,6.53),
+  upper = c( 7.87, 7.33)
+) %>% 
+  map_df(rev)
+
+
+options(ggplot2.discrete.colour= c("#F8766D", "#00BFC4"))
+
+p <- ggplot(data = df,aes(color = director))
+p+geom_errorbarh(aes(y=forcats::fct_inorder(director),xmin=lower,xmax=upper),
+                 height=0.1,
+                 size=1.5)+
+  #geom_text(aes(label=VAL),size=4,Vjust=-0.5)+
+  geom_text(aes(label = mean, x = mean, y = director), vjust = -2, size=7, color = "black") +
+  geom_text(aes(label = lower, x = lower, y = director), vjust = -3, size=5, color = "black") +
+  geom_text(aes(label = upper, x = upper, y = director), vjust = -3, size=5, color = "black") +
+  geom_point(aes(x=mean,y=director),size=5)+
+  theme_bw()+
+  ggtitle("Do Spielberg and Burton have the same mean IMDB ratings",
+          subtitle = "95% confidence intercals overlap")+
+  theme(legend.position = "none")+
+  xlab("Mean IMBD Rating")+
+  ylab("")+
+  geom_rect(aes(xmin=7.271, xmax=7.311, ymin=-Inf, ymax=Inf),color="white",alpha = .1)
+
+
+
+
+
+t.test(rating ~ director, data = movies)
+
+
+obs_diff <- movies %>%
+  specify(rating ~ director) %>%
+  calculate(stat = "diff in means", order = c("Steven Spielberg","Tim Burton"))
+
+
+```
+
+
+```{r, hypothesis_testing_using_infer_package}
+
+null_dist <- movies %>%
+  # specify variables
+  specify(rating ~ director) %>%
+  
+  # assume independence, i.e, there is no difference
+  hypothesize(null = "independence") %>%
+  
+  # generate 1000 reps, of type "permute"
+  generate(reps = 1000, type = "permute") %>%
+  
+  # calculate statistic of difference, namely "diff in means"
+  calculate(stat = "diff in means", order = c("Steven Spielberg","Tim Burton"))
+
+```
+
+
+We can visualize this null distribution with the following code:
+
 ```{r}
+
+ggplot(data = null_dist, aes(x = stat)) +
+  geom_histogram()+
+  theme_bw()
+
+```
+
+
+We can also calculate the p-value for your hypothesis test using the function `infer::get_p_value()`.
+
+```{r}
+
+null_dist %>% visualize() +
+  shade_p_value(obs_stat = obs_diff, direction = "two-sided")+
+  theme_bw()
+
+null_dist %>%
+  get_p_value(obs_stat = obs_diff, direction = "two_sided")
 
 ```
 
@@ -295,6 +526,12 @@ salaries_in_null_world %>% visualize()+
 
 salaries_in_null_world %>% 
   get_p_value(obs_stat = obs_stat, direction = "both")
+
+
+percentile_ci_omega_bootstrap <- salaries_in_null_world %>% 
+   get_confidence_interval(level=0.95, type="percentile")
+percentile_ci_omega_bootstrap
+
 
 
 ```
