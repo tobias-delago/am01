@@ -22,7 +22,7 @@ httr::GET(url, write_disk(happiness.temp <- tempfile(fileext = ".xls")))
 world_happiness <- read_excel(happiness.temp,
                     sheet = "Sheet1",
                     range = cell_cols("A:K")) %>% 
-  janitor::clean_names()
+  janitor::clean_names()  # puts everything in small letter, connects with
 
 # inspect dataframe; how many observations, kinds of variables, etc.
 glimpse(world_happiness)
