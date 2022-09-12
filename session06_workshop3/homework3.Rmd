@@ -51,18 +51,13 @@ library(data.table)
 
 # Youth Risk Behavior Surveillance
 
-
-```{r}
-data(yrbss)
-glimpse(yrbss)
-```
-
-
 ## Exploratory Data Analysis
 
-You will first start with analyzing the `weight` of participants in kilograms. Using visualization and summary statistics, describe the distribution of weights. How many observations are we missing weights from? Use also the skim function.
+Using visualization and summary statistics, describe the distribution of weights. How many observations are we missing weights from? Use also the skim function.
 
 ```{r, eda_on_weight}
+
+data(yrbss)
 
 # Create summary statistics
 summary(yrbss$weight)
@@ -78,24 +73,21 @@ x <- yrbss$weight
 h<-hist(x,  
         xlab="weight", main="Histogram with Normal Curve") 
 
-# Create normal distribution
+# Create normal distribution as comparison
 xfit<-seq(min(x,na.rm = TRUE),max(x,na.rm = TRUE),length=40)               #  order the data 
 yfit<-dnorm(xfit,mean=mean(x,na.rm = TRUE),sd=sd(x,na.rm = TRUE))          #  density of normal dis
 yfit <- yfit*diff(h$mids[1:2])*length(x) 
 lines(xfit, yfit, col="red", lwd=2) 
 
 
-
-
-
 ```
 **Answer:**\
 
-The minimum value of weight is 30, the maximum value is 181, the median is 64, the 1/4 quantile is 56, the 3/4 quantile is 76, and the total number of missing values is 1004. The distribution of weights looks lightly skewed to the right. 
+The minimum value of weight is 30, the maximum value is 181, the median is 64, the lower quantile is 56, the upper quantile is 76, and the total number of missing values is 1004. The distribution of weights looks lightly skewed to the right. We added a normal distribution line as comparison.\
+
 
 
 Let’s create a new variable in the dataframe `yrbss`, called `physical_3plus` , which will be `yes` if they are physically active for at least 3 days a week, and `no` otherwise. Use the `count()` function and see if you get the same results as `group_by()... summarise()`. Also plot your data.
-
   
 ```{r, mutate_and_count}
 
@@ -126,6 +118,13 @@ ggplot(aes(x=physical_3plus,y=number))+
   theme_bw()
 
 ```
+**Answer:**\
+
+In thsi first analysis we have separately showed the percentage proportion also for the NA values. 8906 kids practise sport 3plus times a week while 4404 do not. In the graph we have not included the NA values.
+
+
+## Confidence Interval for Proportion 3plus
+
 Can you provide a 95% confidence interval for the population proportion of high schools that are *NOT* active 3 or more days per week?
 
 ```{r, confidence_interval}
@@ -154,7 +153,7 @@ ci_yrbss <- test %>%
 # print the table with confidence interval
 
 kable(ci_yrbss,
-      caption="CI 3 or more times active")
+      caption="CI 3 or more times active Formula")
 
 
 # Confidence Interval with bootstrap  
@@ -171,15 +170,17 @@ boot_3lower <- test %>%
 
 percentile_ci<- boot_3lower %>% 
    get_confidence_interval(level=0.95, type="percentile")
-percentile_ci
+kable(percentile_ci,
+      caption="CI 3 or more times active Infer")
 
 ```
 
 
 **Answer:**\
 
-The 95% confidence interval is [0.323,0.338] calculated with both, formula and bootstrap.
+The 95% confidence interval is [0.323,0.339] calculated with both, formula and bootstrap.
 
+## Boxplot 3plus
   
 Make a boxplot of `physical_3plus` vs. `weight`. Is there a relationship between these two variables? What did you expect and why?
 
@@ -199,12 +200,12 @@ ggplot(aes(x=physical_3plus,y=weight))+
 
 **Answer:**\
 
-Although almost similiar, there is a positive relationship between being physically active for at least 3 days a week and weight. The result is somehow counter-intuitive, since we thought that more exercise in children would reduce there weight. This might be explained by the reason that people who stay highly active physically are part of physically demanding sports like basket, football and similiar and have thus a higher percentage of muscle or are just bigger.
+Although almost similiar, there is a positive relationship between being physically active for at least 3 days a week and weight. The result is somehow counter-intuitive, since we thought that more exercise in children would reduce there weight. This might be explained by the reason that people who stay highly active take part of physically demanding sports like basket, football and similiar and have thus a higher percentage of muscle or are just bigger. One additional reason could be that kids who are slightly heavier are more incentivised to exercise more frequently.
 
 
-## Confidence Interval
+## Confidence Interval Weight by Formula
 
-Boxplots show how the medians of the two distributions compare, but we can also compare the means of the distributions using either a confidence interval or a hypothesis test. Note that when we calculate the mean, SD, etc. weight in these groups using the mean function, we must ignore any missing values by setting the `na.rm = TRUE`.
+Calculate the mean, SD, etc. weight in these groups using the mean function, we must ignore any missing values by setting the `na.rm = TRUE`and define confidence interval.
 
 
 ```{r, ci_using_formulas}
@@ -232,13 +233,13 @@ There is an observed mean difference of about 1.77kg (68.44 - 66.67), and we not
 
 ## Hypothesis test with formula
 
-Write the null and alternative hypotheses for testing whether mean weights are different for those who exercise at least times a week and those who don’t.
+Write the null and alternative hypotheses for testing whether mean weights are different for those who exercise at least times a week and those who don’t.\
 
 **Answer:**\
 
-Null Hypothesis:mean weights are same for those who exercise at least 3 times a week and those who don't.\
+Null Hypothesis: mean weights are same for those who exercise at least 3 times a week and those who don't.\
 
-Alternative hypotheses:mean weights are not same for those who exercise at least times a week and those who don't. 
+Alternative hypotheses: mean weights are not same for those who exercise at least times a week and those who don't.\
 
 From the calculation below and the output of t.test, confidence interval and p-value , we can infer that the Null Hypothesis can be rejected and alternative hypotheses accepted.
 
@@ -318,17 +319,18 @@ null_dist %>%
 ```{r directors, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "directors.png"), error = FALSE)
 ```
-You can load the data and examine its structure
+Loading data:
 
 ```{r load-movies-data}
 movies <- read_csv(here::here("data", "movies.csv"))
-glimpse(movies)
+
 ```
 
+Calculating confidence intervals:
 
-```{r, fig.height=4}
+```{r, fig.height=4, out.width="100%"}
 
-
+# Filtering data for directors
 movies<-movies%>%
   filter(director %in% c("Steven Spielberg", "Tim Burton"))
 
@@ -359,9 +361,9 @@ p+geom_errorbarh(aes(y=forcats::fct_inorder(director),xmin=lower,xmax=upper),
                  height=0.1,
                  size=1.5)+
   #geom_text(aes(label=VAL),size=4,Vjust=-0.5)+
-  geom_text(aes(label = mean, x = mean, y = director), vjust = -2, size=7, color = "black") +
-  geom_text(aes(label = lower, x = lower, y = director), vjust = -3, size=5, color = "black") +
-  geom_text(aes(label = upper, x = upper, y = director), vjust = -3, size=5, color = "black") +
+  geom_text(aes(label = mean, x = mean, y = director), vjust = -1.5, size=6, color = "black") +
+  geom_text(aes(label = lower, x = lower, y = director), vjust = -2.5, size=4, color = "black") +
+  geom_text(aes(label = upper, x = upper, y = director), vjust = -2.5, size=4, color = "black") +
   geom_point(aes(x=mean,y=director),size=5)+
   theme_bw()+
   ggtitle("Do Spielberg and Burton have the same mean IMDB ratings",
@@ -369,32 +371,39 @@ p+geom_errorbarh(aes(y=forcats::fct_inorder(director),xmin=lower,xmax=upper),
   theme(legend.position = "none")+
   xlab("Mean IMBD Rating")+
   ylab("")+
-  geom_rect(aes(xmin=7.271, xmax=7.311, ymin=-Inf, ymax=Inf),color="white",alpha = .1)
+  geom_rect(aes(xmin=7.271, xmax=7.311, ymin=-Inf, ymax=Inf), color = NA,alpha = .1)
 
 ```
+
 ## Hypothesis testing
 
-In addition, you will run a hpothesis test. You should use both the `t.test` command and the `infer` package to simulate from a null distribution, where you assume zero difference between the two.
+In addition, you will run a hypothesis test. You should use both the `t.test` command and the `infer` package to simulate from a null distribution, where you assume zero difference between the two.
 
 **Answer:**\
 
-Null hypotheses:the mean IMDB rating for Steven Spielberg and Tim Burton are the same .
-Alternative hypotheses:the mean IMDB rating for Steven Spielberg and Tim Burton are not the same .
+Null hypotheses:the mean IMDB rating for Steven Spielberg and Tim Burton are the same .\
+Alternative hypotheses:the mean IMDB rating for Steven Spielberg and Tim Burton are not the same .\
+
+Using the t-test:
 
 ```{r}
 
 t.test(rating ~ director, data = movies)
 
+```
+
+Using the infer package:\
+
+```{r, hypothesis_testing_with_infer_package}
+
+# Calculate diff in means
 
 obs_diff <- movies %>%
   specify(rating ~ director) %>%
   calculate(stat = "diff in means", order = c("Steven Spielberg","Tim Burton"))
 
 
-```
-
-
-```{r, hypothesis_testing_using_infer_package}
+# Infer package
 
 null_dist <- movies %>%
   # specify variables
@@ -420,14 +429,9 @@ null_dist %>%
 
 ```
 
+**Answer:**\
 
-We can also calculate the p-value for your hypothesis test using the function `infer::get_p_value()`.
-
-```{r}
-
-
-
-```
+Both the formula as well as the infer approach showed (p-value < 5% etc.) that we can reject the null hypothesis. At the end of the day we thus conclude that indeed the true difference in means between Steven Spielberg Movies and Tim Burton Movies is not equal to 0.
 
 
 # Omega Group plc- Pay Discrimination
@@ -528,7 +532,6 @@ With 1000 reps the bootstrap simulation gave a p-value of zero, this can be the 
 
 ## Relationship Experience - Gender?
 
-
 ```{r, experience_stats}
 # Summary Statistics of salary by gender
 favstats (experience ~ gender, data=omega)
@@ -610,6 +613,8 @@ The final graph should look like this:
 ```{r brexit_challenge, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "brexit.png"), error = FALSE)
 ```
+
+Import the data:
 ```{r}
 brexit_results <- read_csv("https://raw.githubusercontent.com/kostis-christodoulou/am01/master/data/brexit_results.csv")
 ```
@@ -632,7 +637,7 @@ tidyresults <- brexit_results %>%
 # Create scatterplot with regression lines
 
 ggplot(tidyresults, aes(x= percentage, y = leave_share, colour = party)) +
-  geom_point(alpha = 0.4)+
+  geom_point(alpha = 0.3, size = 1)+
   geom_smooth(method=lm)+
   labs(
     title = "How political affiliation translated to Brexit Voting",
@@ -643,6 +648,7 @@ ggplot(tidyresults, aes(x= percentage, y = leave_share, colour = party)) +
   ylim(20, 102)+
   theme(legend.position="bottom",
         legend.title = element_blank())+
+  theme(text = element_text(size = 7))+
   scale_color_manual(values=colors_brexit,
                     labels=parties_brexit_names)
 
@@ -651,10 +657,6 @@ ggplot(tidyresults, aes(x= percentage, y = leave_share, colour = party)) +
 
 
 # Challenge 2:GDP components over time and among countries
-
-At the risk of oversimplifying things, the main components of gross domestic product, GDP are personal consumption (C), business investment (I), government spending (G) and net exports (exports - imports). You can read more about GDP and the different approaches in calculating at the [Wikipedia GDP page](https://en.wikipedia.org/wiki/Gross_domestic_product).
-
-The GDP data we will look at is from the [United Nations' National Accounts Main Aggregates Database](https://unstats.un.org/unsd/snaama/Downloads), which contains estimates of total GDP and its components for all countries from 1970 to today. We will look at how GDP and its components have changed over time, and compare different countries and how much each component contributes to that country's GDP. The file we will work with is [GDP and its breakdown at constant 2010 prices in US Dollars](http://unstats.un.org/unsd/amaapi/api/file/6) and it has already been saved in the Data directory. Have a look at the Excel file to see how it is structured and organised
 
 
 ```{r read_GDP_data}
@@ -665,28 +667,19 @@ UN_GDP_data  <-  read_excel(here::here("data", "Download-GDPconstant-USD-countri
 
 ```
 
- The first thing you need to do is to tidy the data, as it is in wide format and you must make it into long, tidy format. Please express all figures in billions (divide values by `1e9`, or $10^9$), and you want to rename the indicators into something shorter.
-
-> make sure you remove `eval=FALSE` from the next chunk of R code-- I have it there so I could knit the document
+Tidy the data, use billions for high values and change to shorter variable names.
 
 ```{r reshape_GDP_data}
 
+# Pivot longer + Renaming indicators
+
 tidy_GDP_data  <- UN_GDP_data %>% 
                       pivot_longer(cols = 4:51, names_to = "Year") %>% 
-                      mutate(value=value/(1e9))
-
-# Renaming indicators
-
-tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="Exports of goods and services"] <- "Exports"
-tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="Imports of goods and services"] <- "Imports"
-tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="General government final consumption expenditure"] <- "Government expenditure"
-tidy_GDP_data$IndicatorName[tidy_GDP_data$IndicatorName=="Household consumption expenditure (including Non-profit institutions serving households)"] <- "Household expenditure"
-
-
-
-
-glimpse(tidy_GDP_data)
-
+                      mutate(value=value/(1e9),
+                             across('IndicatorName',str_replace,"Exports of goods and services", "Exports"),
+                             across('IndicatorName',str_replace,"Imports of goods and services", "Imports"),
+                             across('IndicatorName',str_replace,"General government final consumption expenditure", "Government expenditure"),
+                             across('IndicatorName',str_replace,"Household consumption expenditure \\(including Non-profit institutions serving households\\)", "Household expenditure"))
 
 # Let us compare GDP components for these 3 countries
 country_list <- c("United States","India", "Germany")
@@ -697,10 +690,13 @@ indicator_list <- c("Exports","Imports","Government expenditure","Household expe
 ## Can you produce this plots?
 
 The first should look like this:
+
 ```{r gdp1, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "gdp1.png"), error = FALSE)
 ```
-```{r gdp1_self, out.width="100%", fig.height=3.5}
+
+
+```{r gdp1_self, out.width="100%", fig.height=4}
 
 #Creating line chart and setting colors due to different order
 
@@ -723,11 +719,14 @@ tidy_GDP_data %>%
                                   "#F8766D",
                                   "#2FBEF7",
                                   "#EA7DF4"))+
-  theme_bw()
+  theme_bw()+
+  theme(panel.grid.minor.x = element_blank())+
+  theme(text = element_text(size = 7))
 
 ```
 
 The second should look like this:
+
 ```{r gdp2, echo=FALSE, out.width="100%"}
 knitr::include_graphics(here::here("images", "gdp2.png"), error = FALSE)
 ```
@@ -760,10 +759,13 @@ tidy_GDP_data %>%
        caption = "Source: United Nations, https://unstats.un.org/unsd/snaama/Downloads")+
      scale_color_discrete(name = NULL)+
     theme_bw() +
-    scale_y_continuous(labels = scales::percent)
-
+    theme(panel.grid.minor.x = element_blank())+
+    scale_y_continuous(labels = scales::percent)+
+    theme(text = element_text(size = 7))
 
 ```
+
+
 ## What is this last chart telling you? Can you explain in a couple of paragraphs the different dynamic among these three countries? 
 
 
