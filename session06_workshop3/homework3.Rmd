@@ -768,20 +768,45 @@ tidy_GDP_data %>%
 
 ## What is this last chart telling you? Can you explain in a couple of paragraphs the different dynamic among these three countries? 
 
+The last chart potrays that Household expendiure has been the major contributor to GDP since 1970 in all the three countries, while net exports contributes the least.\
 
+While in Germany and the United States Gross Capital Formation and Government Expenditure have been almost overlapping, in India, Gross Capital Formation has been evidently higher than the Government Expenditure.\
 
+It is also interesting to note that in India, the proportion of contribution of Household Expenditure has been consistently falling while that of Gross Capital Formation has been increasing.
 
-
-Secondly, recall that GDP is the sum of Household Expenditure (Consumption *C*), Gross Capital Formation (business investment *I*), Government Expenditure (G) and Net Exports (exports - imports). Even though there is an indicator `Gross Domestic Product (GDP)` in your dataframe, I would like you to calculate it given its components discussed above.
 
 ## What is the % difference between what you calculated as GDP and the GDP figure included in the dataframe?
 
+```{r gdp_self_made, fig.height=4, out.width="100%"}
 
+# Add column for self-made GDP and add column for percentage difference 
 
+GDP_cal<- tidy_GDP_data %>% 
+    mutate(Year=as.integer(Year)) %>% 
+    filter(Country %in% country_list) %>% 
+    pivot_wider(names_from = IndicatorName,values_from = value) %>% 
+    clean_names() %>%   
+    mutate(net_export=(exports-imports),
+           GDP=(household_expenditure+ government_expenditure+gross_capital_formation+net_export),
+           gdp_difference=(GDP-gross_domestic_product_gdp)/(GDP))
 
+# Plot it
+ 
+ GDP_cal%>% ggplot(aes(x=year, y=gdp_difference))+
+           geom_path()+
+          geom_point(size=0.01)+
+          facet_wrap(~country)+
+          scale_y_continuous(labels = scales::percent)+
+          labs(x="Year",
+               y="Difference in GDP",
+               title = "% difference in given GDP and calculated GDP" )+
+          theme_bw()+
+          theme(panel.grid.minor.x =element_blank())
 
+```
+**Answer:**\
 
-
+It is interesting to note that since 2000, especially for Germany and US the value calculated by formula almost exactly matches the official GDP. 
 
 # Deliverables
 
