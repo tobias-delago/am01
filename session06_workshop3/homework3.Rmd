@@ -113,14 +113,14 @@ yrbss%>%
 ggplot(aes(x=physical_3plus,y=number))+
   geom_bar(stat = "identity",width =0.5)+
   labs(x="physical_3plus",y="number")+
-  ggtitle("The bar graph of the number of physical_3plus",
+  ggtitle("How many children workout 3plus times?",
           subtitle = "")+
   theme_bw()
 
 ```
 **Answer:**\
 
-In thsi first analysis we have separately showed the percentage proportion also for the NA values. 8906 kids practise sport 3plus times a week while 4404 do not. In the graph we have not included the NA values.
+In this first analysis we have separately shown the percentage proportion also for the NA values. 8906 kids practice sport 3plus times a week while 4404 do not. In the graph we have not included the NA values.
 
 
 ## Confidence Interval for Proportion 3plus
