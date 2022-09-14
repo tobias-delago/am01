@@ -7,6 +7,8 @@ library(janitor)
 library(broom)
 library(huxtable)
 library(lubridate)
+library(car)
+library(performance)
 library(ggfortify)
 
 # Explore the relationship between bikes hired and a bunch of explanatory variables
@@ -52,11 +54,36 @@ msummary(model1)
 # What is the regression's residual standard error? 
 # What is the intercept standard error? 
 
-# build a number of linear regression models where you try to explain
-# bikes_hired with (some of) the explanatory variables included in the file.
+bike %>% 
+  select(cloud_cover, humidity, pressure, radiation, precipitation, sunshine, mean_temp, min_temp) %>% 
+  ggpairs()
 
 
+model2 <- lm(bikes_hired ~mean_temp + humidity + pressure + radiation  + precipitation + sunshine, data= bike)
+msummary(model2)
+
+model3 <- lm(bikes_hired ~ mean_temp + min_temp+ humidity + pressure + radiation  + precipitation + sunshine, data= bike)
+msummary(model3)
+vif(model3)
+check_model(model3)
+
+model4 <- lm(bikes_hired ~ mean_temp + humidity + pressure + radiation  + precipitation + sunshine + season_name+ factor(year), data= bike)
+msummary(model4)
+vif(model4)
+
+model5 <- lm(bikes_hired ~ mean_temp + humidity + pressure + radiation  + precipitation + sunshine + season_name+ factor(year) + day_of_week, data= bike)
+msummary(model5)
+vif(model5)
+check_model(model5)
 
 
 # produce summary table comparing models using huxtable::huxreg()
-# have a look at https://mam2023.netlify.app/example/modelling_side_by_side_tables/
+huxreg(model1, model2, model3, model4, model5,
+       statistics = c('#observations' = 'nobs', 
+                      'R squared' = 'r.squared', 
+                      'Adj. R Squared' = 'adj.r.squared', 
+                      'Residual SE' = 'sigma'), 
+       bold_signif = 0.05, 
+       stars = NULL
+) %>% 
+  set_caption('Comparison of models')
